@@ -16,7 +16,7 @@ import {
   Clock3
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
-import { formatTime, formatDate, getDayName, getRealtimeStatus } from '@/utils/dateUtils';
+import { formatTime, formatDate, getDayName, getRealtimeStatus, StartAfter } from '@/utils/dateUtils';
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
@@ -74,6 +74,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     if (schedule.TenCoSo.toLocaleLowerCase().includes("khác")) {
       return "Khác";
     }
+    if (schedule.TenCoSo.toLocaleLowerCase().includes("online")) {
+      return "Học Online Zoom";
+    }
 
     return schedule.TenCoSo.replace("Cơ sở ", "").trim();
   }
@@ -89,7 +92,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
         <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Clock className="h-4 w-4 animate-pulse" />
-            Lớp học tiếp theo
+            Tiết học tiếp theo - Bắt đầu sau: {StartAfter(schedule.ThoiGianBD)}
           </div>
         </div>
       )}

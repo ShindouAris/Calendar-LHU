@@ -28,6 +28,30 @@ export const formatDate = (dateString: string): string => {
   }
 };
 
+// Trả về số ngày, giờ, phút còn lại cho đến khi bắt đầu (nếu đã qua thì trả về null)
+export const StartAfter = (dateString: string): string | null => {
+  try {
+    const now = new Date();
+    const date = parseISO(dateString);
+    if (date <= now) return null;
+
+    const diffMs = date.getTime() - now.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const days = Math.floor(diffMinutes / (60 * 24));
+    const hours = Math.floor((diffMinutes % (60 * 24)) / 60);
+    const minutes = diffMinutes % 60;
+
+    let result = '';
+    if (days > 0) result += `${days} ngày `;
+    if (hours > 0) result += `${hours} giờ `;
+    if (minutes > 0) result += `${minutes} phút`;
+
+    return result.trim() || 'Dưới 1 phút';
+  } catch {
+    return null;
+  }
+};
+
 export const getDayName = (dayNumber: number): string => {
   return `Thứ ${dayNumber}`;
 };

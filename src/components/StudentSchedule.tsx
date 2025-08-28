@@ -248,7 +248,7 @@ export const StudentSchedule: React.FC = () => {
                 value={schedules.length}
                 icon={BookOpen}
                 color="blue"
-                description="Tiết học trong tháng"
+                description="Tiết học trong tuần học"
               />
               
               {nextClass && (
