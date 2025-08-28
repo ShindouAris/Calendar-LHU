@@ -107,16 +107,16 @@ export const StudentSchedule: React.FC = () => {
 
   if (!scheduleData) {
     return (
-      <div className="min-h-screen py-8 px-4">
+      <div className="min-h-screen py-6 sm:py-8 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10 sm:mb-12">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
               <GraduationCap className="h-10 w-10 text-white" />
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4">
+            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
               Lịch Học Sinh Viên
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
               Tra cứu lịch học nhanh chóng và tiện lợi với giao diện hiện đại
             </p>
           </div>
@@ -146,6 +146,7 @@ export const StudentSchedule: React.FC = () => {
     }
   }
 
+
   const studentInfo = scheduleData.data[0]?.[0];
   const weekInfo = scheduleData.data[1]?.[0];
   const schedules = scheduleData.data[2] || [];
@@ -158,7 +159,7 @@ export const StudentSchedule: React.FC = () => {
     : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <Header
@@ -209,7 +210,7 @@ export const StudentSchedule: React.FC = () => {
           </CardHeader>
           
           <CardContent className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <StatsCard
                 title="Tổng số lớp"
                 value={schedules.length}
@@ -245,7 +246,7 @@ export const StudentSchedule: React.FC = () => {
         ) : (
           <>
             {/* Toggle View Button */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   {showFullSchedule ? 'Lịch học đầy đủ' : 'Lịch học 7 ngày tới'}
@@ -256,17 +257,17 @@ export const StudentSchedule: React.FC = () => {
               </div>
               
               <Button
-                onClick={() => setShowFullSchedule(!showFullSchedule)}
+                onClick={handleChangeView}
                 variant="outline"
                 size="lg"
-                className="hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
+                className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
               >
                 {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
               </Button>
             </div>
 
             {/* Schedule List */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {displaySchedules.length === 0 ? (
                 <Card className="text-center py-16 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                   <CardContent>

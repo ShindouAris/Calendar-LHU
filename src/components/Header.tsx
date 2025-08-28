@@ -38,11 +38,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Main Header */}
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left Side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {showBack && onBack && (
               <Button
                 onClick={onBack}
@@ -56,8 +56,8 @@ export const Header: React.FC<HeaderProps> = ({
             )}
             
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-white" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
                 {title}
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {showRefresh && onRefresh && (
               <Button
                 onClick={onRefresh}
