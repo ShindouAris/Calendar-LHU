@@ -16,7 +16,7 @@ import {
   Clock3
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
-import { formatTime, formatDate, getDayName } from '@/utils/dateUtils';
+import { formatTime, formatDate, getDayName, getRealtimeStatus } from '@/utils/dateUtils';
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
@@ -62,7 +62,12 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     const m = minutes % 60; // còn dư là phút
     return `${h} giờ ${m > 0 ? `${m} phút` : ''}`;
   }
-  const statusConfig = getStatusConfig(schedule.TinhTrang);
+  // Ưu tiên trạng thái tính theo thời gian thực để tránh sai do API cũ
+  const realtimeStatus = getRealtimeStatus(schedule.ThoiGianBD, schedule.ThoiGianKT);
+  const effectiveStatus = realtimeStatus !== undefined && realtimeStatus !== null
+    ? realtimeStatus
+    : schedule.TinhTrang;
+  const statusConfig = getStatusConfig(effectiveStatus);
   const StatusIcon = statusConfig.icon;
 
   const getStudyPlace = (schedule: ScheduleItem) => {

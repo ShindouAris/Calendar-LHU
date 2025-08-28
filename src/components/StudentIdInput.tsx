@@ -13,7 +13,7 @@ interface StudentIdInputProps {
 
 export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loading }) => {
   const [studentId, setStudentId] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,7 +25,7 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowHistory(false);
+        // setShowHistory(false);
       }
     };
 
@@ -75,7 +75,6 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
             placeholder="Nhập mã sinh viên..."
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
-            onFocus={() => setShowHistory(true)}
             className="border-0 shadow-none text-base sm:text-lg py-3 sm:py-4 px-4 sm:px-6 bg-transparent focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500"
             disabled={loading}
           />

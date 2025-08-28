@@ -65,6 +65,39 @@ export const getNextClass = (schedules: any[]): any | null => {
   return upcomingClasses.length > 0 ? upcomingClasses[0] : null;
 };
 
+
+
 export const hasClassesInNext7Days = (schedules: any[]): boolean => {
   return schedules.some((schedule: any) => isWithinNext7Days(schedule.ThoiGianBD));
+};
+
+// Tính trạng thái tiết học theo thời gian thực
+// 1: Đang diễn ra, 2: Sắp diễn ra (trong 30 phút), 3: Đã kết thúc, 0: Chưa bắt đầu
+export const getRealtimeStatus = (startIso: string, endIso: string): number => {
+  try {
+    const now = new Date();
+    const start = parseISO(startIso);
+    const end = parseISO(endIso);
+
+    if (isAfter(now, end)) {
+      return 3; // Đã kết thúc
+    }
+
+    if (!isAfter(start, now) && !isAfter(now, end)) {
+      return 1; // Đang diễn ra
+    }
+
+    if (isAfter(start, now)) {
+      const diffMs = start.getTime() - now.getTime();
+      const diffMinutes = Math.floor(diffMs / 60000);
+      if (diffMinutes <= 30) {
+        return 2; // Sắp diễn ra
+      }
+      return 0; // Chưa bắt đầu (nhưng chưa tới khoảng sắp diễn ra)
+    }
+
+    return 0;
+  } catch {
+    return 0;
+  }
 };

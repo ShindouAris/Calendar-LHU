@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onRefresh,
   showBack = false,
   showRefresh = false,
-  title = "Lịch Học Sinh Viên",
+  title = "Lịch Học Sinh Viên - LHU",
   showThemeToggle = false,
   page = "home",
   onPageChange,
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Status Badge - Hidden on mobile */}
             <Badge variant="outline" className="hidden lg:flex items-center gap-1">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-xs">Online</span>
+              <span className="text-xs">Đang học</span>
             </Badge>
           </div>
         </div>

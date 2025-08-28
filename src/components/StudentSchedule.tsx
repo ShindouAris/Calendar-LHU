@@ -14,7 +14,9 @@ import { Header } from './Header';
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
 import { ApiResponse } from '@/types/schedule';
-import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days } from '@/utils/dateUtils';
+import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +25,7 @@ export const StudentSchedule: React.FC = () => {
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
   const [page, setPage] = useState("home"); // "home" or "schedule"
+  const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
 
   useEffect(() => {
     cacheService.init();
@@ -77,6 +80,7 @@ export const StudentSchedule: React.FC = () => {
     setCurrentStudentId('');
     setShowFullSchedule(false);
     setError(null);
+    setPage("home");
   };
 
   const handleRefresh = () => {
@@ -114,10 +118,10 @@ export const StudentSchedule: React.FC = () => {
               <GraduationCap className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
-              Lịch Học Sinh Viên
+              Lịch Học Sinh Viên - LHU
             </h1>
             <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Tra cứu lịch học nhanh chóng và tiện lợi với giao diện hiện đại
+              Tra cứu lịch học nhanh chóng
             </p>
           </div>
 
@@ -154,9 +158,15 @@ export const StudentSchedule: React.FC = () => {
   const nextClass = getNextClass(schedules);
   const hasUpcomingClasses = hasClassesInNext7Days(schedules);
 
-  const displaySchedules = showFullSchedule 
+  const baseSchedules = showFullSchedule 
     ? schedules 
     : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
+
+  const displaySchedules = baseSchedules.filter(s => {
+    if (showEnded) return true;
+    const status = getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT);
+    return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF
+  });
 
   return (
     <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
@@ -169,7 +179,7 @@ export const StudentSchedule: React.FC = () => {
           onRefresh={handleRefresh}
           page={page}
           onPageChange={handleChangeView}
-          title="Lịch Học Sinh Viên"
+          title="Lịch Học Sinh Viên - LHU"
         />
 
         {/* Student Info Card */}
@@ -212,20 +222,20 @@ export const StudentSchedule: React.FC = () => {
           <CardContent className="relative">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <StatsCard
-                title="Tổng số lớp"
+                title="Tổng số tiết"
                 value={schedules.length}
                 icon={BookOpen}
                 color="blue"
-                description="Lớp học trong tháng"
+                description="Tiết học trong tháng"
               />
               
               {nextClass && (
                 <StatsCard
-                  title="Lớp tiếp theo"
+                  title="Tiết tiếp theo"
                   value={formatDate(nextClass.ThoiGianBD)}
                   icon={Clock}
                   color="green"
-                  description="Thời gian bắt đầu"
+                  description="Thời gian bắt đầu tiết học"
                 />
               )}
               
@@ -251,19 +261,26 @@ export const StudentSchedule: React.FC = () => {
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   {showFullSchedule ? 'Lịch học đầy đủ' : 'Lịch học 7 ngày tới'}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {displaySchedules.length} lớp học được tìm thấy
+                <p className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  {displaySchedules.length} tiết được tìm thấy
                 </p>
               </div>
-              
-              <Button
-                onClick={handleChangeView}
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
-              >
-                {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
-              </Button>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex items-center gap-2">
+                  <Switch id="toggle-ended" checked={showEnded} onCheckedChange={setShowEnded} />
+                  <Label htmlFor="toggle-ended" className="whitespace-nowrap">Hiển thị lớp đã kết thúc</Label>
+                </div>
+                <Button
+                  onClick={handleChangeView}
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
+                >
+                  {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
+                </Button>
+              </div>
             </div>
 
             {/* Schedule List */}
