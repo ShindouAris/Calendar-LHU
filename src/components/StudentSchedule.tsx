@@ -256,7 +256,7 @@ export const StudentSchedule: React.FC = () => {
         ) : (
           <>
             {/* Toggle View Button */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4 flex-wrap sm:flex-nowrap min-w-0">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                   {showFullSchedule ? 'Lịch học đầy đủ' : 'Lịch học 7 ngày tới'}
@@ -267,19 +267,19 @@ export const StudentSchedule: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="flex items-center gap-2">
-                  <Switch id="toggle-ended" checked={showEnded} onCheckedChange={setShowEnded} />
-                  <Label htmlFor="toggle-ended" className="whitespace-nowrap">Hiển thị lớp đã kết thúc</Label>
-                </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap gap-y-2">
                 <Button
                   onClick={handleChangeView}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
+                  className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
                 >
                   {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
                 </Button>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Switch id="toggle-ended" checked={showEnded} onCheckedChange={setShowEnded} />
+                <Label htmlFor="toggle-ended" className="whitespace-nowrap">Hiển thị lớp đã kết thúc</Label>
               </div>
             </div>
 
