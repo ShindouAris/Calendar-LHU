@@ -49,6 +49,28 @@ class CacheService {
     });
   }
 
+  // Trả về dữ liệu đã lưu dù có thể đã hết hạn (dùng cho offline fallback)
+  async getStale(studentId: string): Promise<ApiResponse | null> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve) => {
+      const transaction = this.db!.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(studentId);
+
+      request.onsuccess = () => {
+        const cached: CachedData = request.result;
+        if (cached) {
+          resolve(cached.data);
+        } else {
+          resolve(null);
+        }
+      };
+
+      request.onerror = () => resolve(null);
+    });
+  }
+
   async set(studentId: string, data: ApiResponse): Promise<void> {
     if (!this.db) await this.init();
     

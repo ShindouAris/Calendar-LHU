@@ -17,6 +17,7 @@ import { ApiResponse } from '@/types/schedule';
 import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/hooks/use-toast';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -62,8 +63,29 @@ export const StudentSchedule: React.FC = () => {
       
       setScheduleData(response);
       setCurrentStudentId(studentId);
+      if (!navigator.onLine) {
+        toast({
+          title: 'Đang ngoại tuyến',
+          description: 'Đã đồng bộ dữ liệu khi có mạng trở lại.',
+        });
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
+      // Thử fallback sang dữ liệu đã lưu (kể cả khi đã hết hạn) để hỗ trợ offline
+      try {
+        const stale = await cacheService.getStale(studentId);
+        if (stale) {
+          setScheduleData(stale);
+          setCurrentStudentId(studentId);
+          toast({
+            title: 'Hiển thị dữ liệu offline',
+            description: 'Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.',
+          });
+        } else {
+          setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
+        }
+      } catch {
+        setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
+      }
     } finally {
       setLoading(false);
     }

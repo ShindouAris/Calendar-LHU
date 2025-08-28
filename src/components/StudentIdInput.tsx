@@ -148,7 +148,7 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full border border-gray-200 dark:border-gray-700 shadow-lg">
           <Sparkles className="h-4 w-4 text-blue-500" />
           <Badge variant="outline" className="text-xs font-medium">
-            Dữ liệu được lưu cache trong 30 phút
+           { navigator.onLine ? "Dữ liệu được lưu cache trong 30 phút" : "Bạn đang ngoại tuyến"}
           </Badge>
         </div>
       </div>
