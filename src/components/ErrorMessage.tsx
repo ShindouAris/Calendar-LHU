@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, RefreshCw, Wifi, Server } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Wifi, Server, UserRoundX } from 'lucide-react';
 
 interface ErrorMessageProps {
   message: string;
@@ -16,6 +16,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
     if (errorMessage.toLowerCase().includes('server') || errorMessage.toLowerCase().includes('api')) {
       return <Server className="h-12 w-12 text-red-500" />;
     }
+    if (errorMessage.toLowerCase().includes('mã sinh viên không tồn tại')) {
+      return <UserRoundX className="h-12 w-12 text-red-500" />;
+    }
     return <AlertTriangle className="h-12 w-12 text-red-500" />;
   };
 
@@ -26,6 +29,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
     if (errorMessage.toLowerCase().includes('server') || errorMessage.toLowerCase().includes('api')) {
       return 'Lỗi máy chủ';
     }
+    if (errorMessage.toLowerCase().includes('mã sinh viên không tồn tại')) {
+      return "Không tìm thấy thông tin sinh viên";
+    }
     return 'Đã xảy ra lỗi';
   };
 
@@ -35,6 +41,9 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
     }
     if (errorMessage.toLowerCase().includes('server') || errorMessage.toLowerCase().includes('api')) {
       return 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau.';
+    }
+    if (errorMessage.toLowerCase().includes('mã sinh viên không tồn tại')) {
+      return "Không tìm thấy thông tin sinh viên. Vui lòng kiểm tra lại.";
     }
     return 'Có vẻ như đã xảy ra lỗi không mong muốn. Vui lòng thử lại.';
   };
@@ -71,7 +80,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
           <Button
             onClick={onRetry}
             size="lg"
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            className={`bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${getErrorDescription(message) !== "Không tìm thấy thông tin sinh viên. Vui lòng kiểm tra lại." ? "opacity-100" : "opacity-50 cursor-not-allowed"}`}
           >
             <RefreshCw className="h-5 w-5 mr-2" />
             Thử lại
@@ -79,6 +88,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
         </div>
 
         {/* Help Text */}
+        {getErrorDescription(message) !== "Không tìm thấy thông tin sinh viên. Vui lòng kiểm tra lại." && (
         <div className="mt-8 text-sm text-gray-500 dark:text-gray-400">
           <p>Nếu vấn đề vẫn tiếp tục, vui lòng:</p>
           <ul className="mt-2 space-y-1">
@@ -87,6 +97,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ message, onRetry }) 
             <li>• Liên hệ hỗ trợ kỹ thuật</li>
           </ul>
         </div>
+        )}
       </CardContent>
     </Card>
   );
