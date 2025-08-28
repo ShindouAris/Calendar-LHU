@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin } from 'lucide-react';
+import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download } from 'lucide-react';
 
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './ScheduleCard';
@@ -190,6 +190,92 @@ export const StudentSchedule: React.FC = () => {
     return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF
   });
 
+  const buildICSDate = (isoString: string): string => {
+    try {
+      const d = new Date(isoString);
+      const iso = d.toISOString();
+      // 2025-08-28T12:00:00.000Z -> 20250828T120000Z
+      const compact = iso.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+      return compact.substring(0, 15) + 'Z';
+    } catch {
+      return '';
+    }
+  };
+
+  const escapeText = (text: string): string => {
+    return (text || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/\n/g, '\\n')
+      .replace(/, /g, '\\, ')
+      .replace(/;/g, '\\;');
+  };
+
+  const generateICS = (items: typeof schedules): string => {
+    const now = new Date().toISOString();
+    const dtstamp = buildICSDate(now);
+    const lines: string[] = [];
+    lines.push('BEGIN:VCALENDAR');
+    lines.push('VERSION:2.0');
+    lines.push('PRODID:-//LHU Schedule//VN');
+    lines.push('CALSCALE:GREGORIAN');
+    lines.push('METHOD:PUBLISH');
+    const calName = `Lịch học ${studentInfo?.HoTen || ''}`.trim();
+    if (calName) {
+      lines.push(`X-WR-CALNAME:${escapeText(calName)}`);
+    }
+
+    items.forEach((ev, idx) => {
+      const uid = `${ev.ID || idx}-${buildICSDate(ev.ThoiGianBD)}@lhu-schedule`;
+      const dtStart = buildICSDate(ev.ThoiGianBD);
+      const dtEnd = buildICSDate(ev.ThoiGianKT);
+      const summary = `${ev.TenMonHoc || ''}${ev.TenNhom ? ' - ' + ev.TenNhom : ''}`.trim();
+      const location = ev.TenPhong || ev.OnlineLink || '';
+      const descriptionParts = [
+        ev.GiaoVien ? `Giảng viên: ${ev.GiaoVien}` : '',
+        ev.TenCoSo ? `Cơ sở: ${ev.TenCoSo}` : '',
+        ev.GoogleMap ? `Bản đồ: ${ev.GoogleMap}` : '',
+        ev.OnlineLink ? `Link: ${ev.OnlineLink}` : '',
+      ].filter(Boolean);
+      const description = descriptionParts.join('\n');
+
+      lines.push('BEGIN:VEVENT');
+      lines.push(`UID:${uid}`);
+      lines.push(`DTSTAMP:${dtstamp}`);
+      if (dtStart) lines.push(`DTSTART:${dtStart}`);
+      if (dtEnd) lines.push(`DTEND:${dtEnd}`);
+      if (summary) lines.push(`SUMMARY:${escapeText(summary)}`);
+      if (location) lines.push(`LOCATION:${escapeText(location)}`);
+      if (description) lines.push(`DESCRIPTION:${escapeText(description)}`);
+      lines.push('END:VEVENT');
+    });
+
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
+  };
+
+  const handleExportICS = () => {
+    try {
+      const icsContent = generateICS(displaySchedules);
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeName = (studentInfo?.HoTen || currentStudentId || 'schedule')
+        .toString()
+        .replace(/[^\p{L}\p{N}_-]+/gu, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+      a.download = `lich_hoc_${safeName || 'sinh_vien'}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: 'Đã xuất tệp ICS', description: 'Bạn có thể nhập vào Google/Apple Calendar.' });
+    } catch (e) {
+      toast({ title: 'Xuất ICS thất bại', description: 'Vui lòng thử lại sau.' });
+    }
+  };
+
   return (
     <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -298,6 +384,15 @@ export const StudentSchedule: React.FC = () => {
                 >
                   {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
                 </Button>
+                {displaySchedules.length > 0 && (
+                  <Button
+                    onClick={handleExportICS}
+                    size="lg"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
+                  >
+                    <Download className="h-4 w-4 mr-2" /> Xuất lịch học
+                  </Button>
+                )}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Switch id="toggle-ended" checked={showEnded} onCheckedChange={setShowEnded} />
