@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -81,6 +81,20 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     return schedule.TenCoSo.replace("Cơ sở ", "").trim();
   }
 
+  const [timestring, setTimestring] = useState("Đang tính toán...")
+
+  useEffect(() => {
+
+    const timer = setInterval(() => {
+      const start_time = StartAfter(schedule.ThoiGianBD)
+      if (start_time) {
+        setTimestring(start_time)
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [schedule.ThoiGianBD])
+
   return (
     <Card className={`group transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
       isNext 
@@ -92,7 +106,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
         <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Clock className="h-4 w-4 animate-pulse" />
-            Tiết học tiếp theo - Bắt đầu sau: {StartAfter(schedule.ThoiGianBD)}
+            Tiết học tiếp theo - Bắt đầu sau: {timestring}
           </div>
         </div>
       )}
@@ -111,6 +125,20 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <span className="hidden sm:inline text-gray-400">•</span>
               <span className="font-medium">{formatDate(schedule.ThoiGianBD)}</span>
+              {/* Badges: TinhTrang, CalenType, Type */}
+              {schedule.TinhTrang !== 0 && (
+                <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
+                  Báo nghỉ
+                </Badge>
+              )}
+              {schedule.CalenType === 2 && (
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-1 rounded-full shadow">
+                  Thi
+                </Badge>
+              )}
+              <Badge className="bg-gradient-to-r from-slate-200 to-slate-300 text-slate-900 dark:from-slate-700 dark:to-slate-600 dark:text-white px-2.5 py-1 rounded-full shadow">
+                {schedule.Type === 0 ? 'Lý thuyết' : 'Thực hành'}
+              </Badge>
             </div>
           </div>
           

@@ -31,26 +31,28 @@ export const formatDate = (dateString: string): string => {
 // Trả về số ngày, giờ, phút còn lại cho đến khi bắt đầu (nếu đã qua thì trả về null)
 export const StartAfter = (dateString: string): string | null => {
   try {
-    const now = new Date();
-    const date = parseISO(dateString);
-    if (date <= now) return null;
+    const now = new Date()
+    const date = parseISO(dateString)
+    if (date <= now) return null
 
-    const diffMs = date.getTime() - now.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    const days = Math.floor(diffMinutes / (60 * 24));
-    const hours = Math.floor((diffMinutes % (60 * 24)) / 60);
-    const minutes = diffMinutes % 60;
+    const diffMs = date.getTime() - now.getTime()
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000)
 
-    let result = '';
-    if (days > 0) result += `${days} ngày `;
-    if (hours > 0) result += `${hours} giờ `;
-    if (minutes > 0) result += `${minutes} phút`;
+    let result = ''
+    if (days > 0) result += `${days} ngày `
+    if (hours > 0) result += `${hours} giờ `
+    if (minutes > 0) result += `${minutes} phút `
+    if (seconds > 0) result += `${seconds} giây`
 
-    return result.trim() || 'Dưới 1 phút';
+    return result.trim() || 'Dưới 1 giây'
   } catch {
-    return null;
+    return null
   }
-};
+}
+
 
 export const getDayName = (dayNumber: number): string => {
   return `Thứ ${dayNumber}`;
