@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import {
   Calendar,
   AlertCircle,
   CheckCircle2,
-  Clock3
+  Clock3,
+  MessageSquareWarning
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
 import { formatTime, formatDate, getDayName, getRealtimeStatus, StartAfter } from '@/utils/dateUtils';
@@ -82,6 +83,46 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
   }
 
   const [timestring, setTimestring] = useState("Đang tính toán...")
+
+  // Chỉ chạy marquee nếu nội dung tràn hộp
+  const groupNameRef = useRef<HTMLDivElement | null>(null)
+  const [shouldMarquee, setShouldMarquee] = useState(false)
+
+  useEffect(() => {
+    const evaluateOverflow = () => {
+      const el = groupNameRef.current
+      if (!el) return
+      const isOverflowing = el.scrollWidth > el.clientWidth
+      setShouldMarquee(isOverflowing)
+    }
+
+    // đo lần đầu và khi resize
+    evaluateOverflow()
+    window.addEventListener('resize', evaluateOverflow)
+    return () => window.removeEventListener('resize', evaluateOverflow)
+  }, [])
+
+  const [infomation, setInfomation]= useState<string | null>(null)
+
+  const [nhomHoc, setNhomHoc] = useState<string | null>(null)
+
+  const getInfomation = (text: string) => {
+    const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
+
+    const match = text.match(regex)
+
+    console.log(`Matched: ${match}`)
+    
+    if (match) {
+      setNhomHoc(match[1])
+      setInfomation(match[2])
+    }
+  }
+
+  useEffect(() => {
+    console.log(`Getting infomation - ${schedule.TenNhom}`)
+    getInfomation(schedule.TenNhom)
+  }, [schedule.TenNhom])
 
   useEffect(() => {
 
@@ -184,7 +225,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Giảng viên</div>
                 <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{schedule.GiaoVien}</div>
               </div>
-            </div>
+            </div>            
           </div>
 
           {/* Right Column */}
@@ -193,9 +234,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               <div className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
               <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 overflow-hidden">
               <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
-              <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{schedule.TenNhom}</div>
+              <div ref={groupNameRef} className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap ${shouldMarquee ? 'animate-marquee' : ''}`}>{nhomHoc ? nhomHoc : schedule.TenNhom}</div>
               </div>
             </div>
 
@@ -219,6 +260,16 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
             </div>
           </div>
+          {infomation !== null &&
+            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-xl min-h-[60px] sm:min-h-[72px] border border-yellow-300 dark:border-yellow-700">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                <MessageSquareWarning className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-semibold">Lưu ý</div>
+                <div className="text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100 truncate">{infomation}</div>
+              </div>
+            </div>} 
         </div>
 
         {/* Action Buttons */}
