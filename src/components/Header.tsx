@@ -130,13 +130,14 @@ export const Header: React.FC<HeaderProps> = ({
             <Button
               variant={page === "timetable" ? "default" : "ghost"}
               size="sm"
-              className="flex items-center gap-2 text-sm"
+              className="hidden sm:flex items-center gap-2 text-sm"
               onClick={() => onPageChange("timetable")}
               disabled={page === "timetable"}
             >
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Thời khóa biểu</span>
             </Button>
+
           </div>
         )}
       </div>
