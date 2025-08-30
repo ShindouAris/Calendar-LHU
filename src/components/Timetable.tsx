@@ -35,7 +35,10 @@ interface CalendarEvent {
   resource: ScheduleItem;
 }
 
-const getStatusColor = (status: number) => {
+const getStatusColor = (status: number, is_cancelled: boolean) => {
+  if (is_cancelled) {
+    return 'bg-red-500'
+  }
   switch (status) {
     case 1: return 'bg-green-500'; // Đang diễn ra
     case 2: return 'bg-yellow-500'; // Sắp diễn ra
@@ -44,7 +47,10 @@ const getStatusColor = (status: number) => {
   }
 };
 
-const getStatusText = (status: number) => {
+const getStatusText = (status: number, is_cancelled: boolean) => {
+  if (is_cancelled) {
+    return 'Báo Nghỉ'
+  }
   switch (status) {
     case 1: return 'Đang diễn ra';
     case 2: return 'Sắp diễn ra';
@@ -74,13 +80,14 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
 
   const eventStyleGetter = (event: CalendarEvent) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
-    const color = getStatusColor(status);
+    const is_cancelled = event.resource.TinhTrang !== 0;
+    const color = getStatusColor(status, is_cancelled);
     
     return {
       style: {
         backgroundColor: color === 'bg-green-500' ? '#10b981' : 
                        color === 'bg-yellow-500' ? '#f59e0b' : 
-                       color === 'bg-gray-400' ? '#9ca3af' : '#3b82f6',
+                       color === 'bg-gray-400' ? '#9ca3af' : color==="bg-red-500" ? '#E62727' : '#3b82f6',
         borderRadius: '6px',
         opacity: 0.9,
         color: 'white',
@@ -94,7 +101,8 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
-    const statusText = getStatusText(status);
+    const is_cancelled = event.resource.TinhTrang !== 0;
+    const statusText = getStatusText(status, is_cancelled);
     
     return (
       <div className="p-1 text-xs">
@@ -104,7 +112,7 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
           <div>{event.resource.GiaoVien}</div>
           <Badge 
             variant="secondary" 
-            className={`text-xs px-1 py-0.5 ${getStatusColor(status)} text-white`}
+            className={`text-xs px-1 py-0.5 ${getStatusColor(status, is_cancelled)} text-white`}
           >
             {statusText}
           </Badge>
@@ -130,7 +138,6 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
       month: 'Tháng',
       week: 'Tuần',
       day: 'Ngày',
-      agenda: 'Danh sách'
     };
 
     return (
