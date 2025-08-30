@@ -18,6 +18,7 @@ import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, get
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { Timetable } from './Timetable';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export const StudentSchedule: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<ApiResponse | null>(null);
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
-  const [page, setPage] = useState("home"); // "home" or "schedule"
+  const [page, setPage] = useState("home"); // "home", "schedule", or "timetable"
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
 
   useEffect(() => {
@@ -161,14 +162,16 @@ export const StudentSchedule: React.FC = () => {
     );
   }
 
-  const handleChangeView = () => {
-    if (page === "schedule") {
+  const handleChangeView = (newPage: string) => {
+    if (newPage === "home") {
       setPage("home");
       setShowFullSchedule(false);
-    } else {
+    } else if (newPage === "schedule") {
       setPage("schedule");
       setShowFullSchedule(true);
-      return;
+    } else if (newPage === "timetable") {
+      setPage("timetable");
+      setShowFullSchedule(false);
     }
   }
 
@@ -359,7 +362,12 @@ export const StudentSchedule: React.FC = () => {
         </Card>
 
         {/* Schedule Display */}
-        {!hasUpcomingClasses && !showFullSchedule ? (
+        {page === "timetable" ? (
+          <Timetable 
+            schedules={schedules} 
+            studentName={studentInfo?.HoTen}
+          />
+        ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (
           <>
@@ -377,7 +385,7 @@ export const StudentSchedule: React.FC = () => {
 
               <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap gap-y-2">
                 <Button
-                  onClick={handleChangeView}
+                  onClick={() => handleChangeView(showFullSchedule ? "home" : "schedule")}
                   variant="outline"
                   size="lg"
                   className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"

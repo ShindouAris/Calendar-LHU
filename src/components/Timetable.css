@@ -1,0 +1,233 @@
+/* Custom styles for react-big-calendar */
+.rbc-calendar {
+  font-family: inherit;
+  background: transparent;
+}
+
+.rbc-header {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  padding: 8px 4px;
+}
+
+.rbc-month-view,
+.rbc-time-view {
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+.rbc-time-header {
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+.rbc-time-content {
+  border-color: hsl(var(--border));
+}
+
+.rbc-timeslot-group {
+  border-color: hsl(var(--border));
+}
+
+.rbc-time-slot {
+  border-color: hsl(var(--border));
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-color: hsl(var(--border));
+}
+
+.rbc-day-bg {
+  background-color: hsl(var(--card));
+}
+
+.rbc-day-bg:hover {
+  background-color: hsl(var(--accent));
+}
+
+.rbc-off-range-bg {
+  background-color: hsl(var(--muted));
+}
+
+.rbc-off-range {
+  color: hsl(var(--muted-foreground));
+}
+
+.rbc-today {
+  background-color: hsl(var(--accent));
+}
+
+.rbc-event {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rbc-event:hover {
+  background-color: hsl(var(--primary-foreground));
+  color: hsl(var(--primary));
+}
+
+.rbc-event.rbc-selected {
+  background-color: hsl(var(--secondary));
+  border-color: hsl(var(--secondary));
+}
+
+.rbc-show-more {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.rbc-show-more:hover {
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+}
+
+.rbc-toolbar {
+  margin-bottom: 1rem;
+}
+
+.rbc-toolbar button {
+  background-color: hsl(var(--secondary));
+  border-color: hsl(var(--border));
+  color: hsl(var(--secondary-foreground));
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+  background-color: hsl(var(--secondary-foreground));
+  color: hsl(var(--secondary));
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rbc-toolbar button.rbc-active:hover {
+  background-color: hsl(var(--primary-foreground));
+  color: hsl(var(--primary));
+}
+
+.rbc-toolbar-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.rbc-btn-group {
+  background-color: hsl(var(--muted));
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.rbc-btn-group button {
+  border-radius: 4px;
+  margin: 0 1px;
+}
+
+.rbc-btn-group button:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.rbc-btn-group button:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.rbc-time-gutter {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.rbc-time-header-gutter {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.rbc-agenda-view {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.rbc-agenda-view table.rbc-agenda-table {
+  border-color: hsl(var(--border));
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  border-color: hsl(var(--border));
+  padding: 8px;
+}
+
+.rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--muted));
+  padding: 8px;
+  font-weight: 600;
+}
+
+.rbc-agenda-time-cell {
+  color: hsl(var(--muted-foreground));
+}
+
+.rbc-agenda-date-cell {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.rbc-agenda-event-cell {
+  color: hsl(var(--foreground));
+}
+
+/* Dark mode specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .rbc-calendar {
+    color: hsl(var(--foreground));
+  }
+  
+  .rbc-event {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .rbc-toolbar button {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .rbc-toolbar-label {
+    text-align: center;
+    order: -1;
+  }
+  
+  .rbc-btn-group {
+    justify-content: center;
+  }
+  
+  .rbc-event {
+    font-size: 10px;
+    padding: 1px 2px;
+  }
+}

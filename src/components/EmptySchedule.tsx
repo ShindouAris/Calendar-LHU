@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Clock, BookOpen, ArrowRight } from 'lucide-react';
 
 interface EmptyScheduleProps {
-  onViewFullSchedule: () => void;
+  onViewFullSchedule: (page: string) => void;
 }
 
 export const EmptySchedule: React.FC<EmptyScheduleProps> = ({ onViewFullSchedule }) => {
@@ -31,15 +31,28 @@ export const EmptySchedule: React.FC<EmptyScheduleProps> = ({ onViewFullSchedule
         </p>
 
         {/* Action Button */}
-        <Button
-          onClick={onViewFullSchedule}
-          size="lg"
-          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
-        >
-          <BookOpen className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-          Xem lịch học đầy đủ
-          <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            onClick={() => onViewFullSchedule("schedule")}
+            size="lg"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+          >
+            <BookOpen className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+            Lịch học đầy đủ
+            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          
+          <Button
+            onClick={() => onViewFullSchedule("timetable")}
+            size="lg"
+            variant="outline"
+            className="border-2 border-purple-500 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/50 px-6 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+          >
+            <Calendar className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
+            Thời khóa biểu
+            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
 
         {/* Additional Info */}
         <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
