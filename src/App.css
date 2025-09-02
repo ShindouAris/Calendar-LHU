@@ -54,6 +54,8 @@
 
 @keyframes marquee {
   0%   { transform: translateX(100%); }
+  40%  { transform: translateX(0%); }     /* dừng ở giữa */
+  50%  { transform: translateX(0%); }     
   100% { transform: translateX(-100%); }
 }
 

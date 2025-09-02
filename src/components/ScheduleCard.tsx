@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
 import { formatTime, formatDate, getDayName, getRealtimeStatus, StartAfter } from '@/utils/dateUtils';
+import { ApiService } from '@/services/apiService';
+import type { HourForecast } from '@/types/weather';
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
@@ -134,6 +136,49 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     }, 1000)
 
     return () => clearInterval(timer)
+  }, [schedule.ThoiGianBD])
+
+  // Weather forecast (only if class within 3 days)
+  const [forecastHour, setForecastHour] = useState<HourForecast | null>(null)
+  useEffect(() => {
+    const now = Date.now()
+    const start = new Date(schedule.ThoiGianBD).getTime()
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000
+    console.log('[WeatherForecast] Kiểm tra thời gian tiết học:', {
+      now,
+      start,
+      ThoiGianBD: schedule.ThoiGianBD,
+      cách_bao_nhiêu_ms: start - now,
+      quá_3_ngày: start - now > threeDaysMs,
+    })
+    if (isNaN(start) || start - now > threeDaysMs) {
+      console.log('[WeatherForecast] Không lấy dự báo thời tiết vì tiết học ngoài phạm vi 3 ngày.')
+      setForecastHour(null)
+      return
+    }
+    let cancelled = false
+    const load = async () => {
+      try {
+        console.log('[WeatherForecast] Gọi API lấy dự báo thời tiết cho', schedule.ThoiGianBD)
+        const data: HourForecast = await ApiService.get_forecast_weather(schedule.ThoiGianBD)
+        console.log('[WeatherForecast] Giờ dự báo gần nhất:', data)
+        if (data.error) {
+          cancelled = true
+          return
+        }
+        if (!cancelled) setForecastHour(data)
+      } catch (err) {
+        console.log('[WeatherForecast] Lỗi khi lấy dự báo thời tiết:', err)
+        if (!cancelled) setForecastHour(null)
+      }
+    }
+    load().then(() => {
+      console.log('[WeatherForecast] Đã lấy dự báo thời tiết cho', schedule.ThoiGianBD)
+    })
+    return () => {
+      cancelled = true
+      console.log('[WeatherForecast] Hủy lấy dự báo thời tiết (unmount hoặc đổi tiết học)')
+    }
   }, [schedule.ThoiGianBD])
 
   return (
@@ -259,6 +304,29 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                 <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{minutesToHourMinute(schedule.SoTietBuoi)}</div>
               </div>
             </div>
+            {forecastHour && (
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-sky-500 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={
+                      forecastHour?.condition?.icon
+                        ? (forecastHour.condition.icon.startsWith('http')
+                            ? forecastHour.condition.icon
+                            : `https:${forecastHour.condition.icon}`)
+                        : '/favicon.svg'
+                    }
+                    alt="weather"
+                    className="w-6 h-6"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến</div>
+                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                    {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           {infomation !== null &&
             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-xl min-h-[60px] sm:min-h-[72px] border border-yellow-300 dark:border-yellow-700">

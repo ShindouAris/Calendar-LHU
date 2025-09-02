@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download } from 'lucide-react';
 
@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Timetable } from './Timetable';
+import type { WeatherCurrentAPIResponse } from '@/types/weather';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -28,9 +29,22 @@ export const StudentSchedule: React.FC = () => {
   const [showFullSchedule, setShowFullSchedule] = useState(false);
   const [page, setPage] = useState("home"); // "home", "schedule", or "timetable"
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
+  const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
   useEffect(() => {
     cacheService.init();
+  }, []);
+
+  useEffect(() => {
+    const fetchCurrentWeather = async () => {
+      try {
+        const data = await ApiService.get_current_weather();
+        setCurrentWeather(data);
+      } catch (e) {
+        // bỏ qua lỗi thời tiết để không ảnh hưởng trải nghiệm
+      }
+    };
+    fetchCurrentWeather();
   }, []);
 
   const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
@@ -359,6 +373,26 @@ export const StudentSchedule: React.FC = () => {
               />
             </div>
           </CardContent>
+          <CardFooter className="w-full">
+            {currentWeather && (
+              <div className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 min-h-[72px] w-full">
+                <div className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
+                  {/* icon ảnh từ API */}
+                  <img
+                    src={(currentWeather.current.condition.icon || '').startsWith('http') ? currentWeather.current.condition.icon : `https:${currentWeather.current.condition.icon}`}
+                    alt="weather"
+                    className="w-7 h-7"
+                  />
+                </div>
+                <div className="min-w-0 text-center w-full">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Thời tiết hiện tại</div>
+                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                    {currentWeather.current.temp_c}°C • {currentWeather.current.condition.text}
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardFooter>
         </Card>
 
         {/* Schedule Display */}
