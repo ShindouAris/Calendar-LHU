@@ -3,9 +3,9 @@ import { computeAQIFromPM } from "./aqiService";
 
 const airQualityMessage = (aqi: number): string | null => {
     if (aqi <= 100) return null;
-    if (aqi <= 150) return "😐 AQI khá cao, người nhạy cảm nên đeo khẩu trang";
-    if (aqi <= 200) return "😷 AQI kém, nên hạn chế ra ngoài";
-    return "💀 AQI rất xấu, tránh đi đường dài mà không đeo khẩu trang";
+    if (aqi <= 150) return "😐 Chất lượng không khí khá tệ, người nhạy cảm nên đeo khẩu trang";
+    if (aqi <= 200) return "😷 Chất lượng không khí kém, nên đeo khẩu trang khi đến trường";
+    return "💀 Chất lượng không khí rất xấu, hãy đeo khẩu trang";
 };
 
 // ---- Nhóm nắng / UV ----

@@ -90,10 +90,13 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
           </div>
         </CardContent>
         <CardFooter>
-          <div className="w-full rounded-md bg-yellow-50 dark:bg-yellow-900/30 px-4 py-3 text-sm text-yellow-800 dark:text-yellow-100 border border-yellow-200 dark:border-yellow-700 shadow-inner whitespace-pre-line">
-            {get_warning(currentWeather)}
-          </div>
+            <div className="w-full rounded-xl border border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
+                ⚠️ Lưu ý thời tiết
+                <hr className="my-2 border-yellow-300 dark:border-yellow-700" />
+                {get_warning(currentWeather)}
+            </div>
         </CardFooter>
+
       </Card>
       )}
 
