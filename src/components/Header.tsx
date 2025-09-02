@@ -17,7 +17,7 @@ interface HeaderProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
@@ -136,6 +136,17 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Calendar className="h-4 w-4" />
               <span className="hidden sm:inline">Thời khóa biểu</span>
+            </Button>
+
+            <Button
+              variant={page === "weather" ? "default" : "ghost"}
+              size="sm"
+              className="flex items-center gap-2 text-sm"
+              onClick={() => onPageChange("weather")}
+              disabled={page === "weather"}
+            >
+              <Sun className="h-4 w-4" />
+              <span className="hidden sm:inline">Thời tiết</span>
             </Button>
 
           </div>

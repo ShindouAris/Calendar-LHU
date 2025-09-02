@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
+import WeatherPage from '@/components/WeatherPage';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ export const StudentSchedule: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<ApiResponse | null>(null);
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
-  const [page, setPage] = useState("home"); // "home", "schedule", or "timetable"
+  const [page, setPage] = useState("home"); // "home", "schedule", "timetable", or "weather"
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
@@ -185,6 +186,9 @@ export const StudentSchedule: React.FC = () => {
       setShowFullSchedule(true);
     } else if (newPage === "timetable") {
       setPage("timetable");
+      setShowFullSchedule(false);
+    } else if (newPage === "weather") {
+      setPage("weather");
       setShowFullSchedule(false);
     }
   }
@@ -401,6 +405,8 @@ export const StudentSchedule: React.FC = () => {
             schedules={schedules} 
             studentName={studentInfo?.HoTen}
           />
+        ) : page === "weather" ? (
+          <WeatherPage onBackToSchedule={() => setPage('schedule')} />
         ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (

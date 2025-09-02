@@ -1,5 +1,5 @@
 import { ApiRequest, ApiResponse } from '@/types/schedule';
-import { ForecastDay, HourForecast } from '@/types/weather';
+import { ForecastDay, HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
 // const API_ENDPOINT = 'https://tapi.lhu.edu.vn/calen/auth/XemLich_LichSinhVien';
 const API_ENDPOINT = 'http://localhost:3000'
@@ -37,7 +37,7 @@ export class ApiService {
 
     return await response.json();
   };
-  static async get_current_weather() {
+  static async get_current_weather(): Promise<WeatherCurrentAPIResponse> {
     const response = await fetch(`${API_ENDPOINT}/weather/current`, {
       method: 'GET',
     });
@@ -109,7 +109,7 @@ export class ApiService {
     return await response.json();
   }
   
-  static async get_3_day_forecast_weather(): Promise<ForecastDay[]> {
+  static async get_3_day_forecast_weather(): Promise<WeatherForeCastAPIResponse> {
     const response = await fetch(`${API_ENDPOINT}/weather/forecast_all`, {
       method: 'GET',
     });

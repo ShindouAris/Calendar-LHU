@@ -34,6 +34,7 @@ export interface CurrentWeather {
   feelslike_c: number;
   windchill_c: number;
   dewpoint_c: number;
+  precip_mm: number
   uv: number;
   air_quality: AirQuality;
 }
@@ -41,7 +42,7 @@ export interface CurrentWeather {
 export interface AirQuality {
   pm2_5: number;
   pm10: number;
-  us_epa_index: number;
+  "us-epa-index": number;
 }
 
 export interface Condition {
@@ -71,6 +72,7 @@ export interface DayForecast {
   daily_chance_of_rain: number;
   condition: Condition;
   uv: number;
+  air_quality: AirQuality;
 }
 
 export interface HourForecast {
