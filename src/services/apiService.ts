@@ -1,12 +1,17 @@
 import { ApiRequest, ApiResponse } from '@/types/schedule';
 import { HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
-const API_ENDPOINT = 'https://calenapi.chisadin.site'
+const API_ENDPOINT = import.meta.env.API_URL 
+const SCHOOL_ENDPOINT = import.meta.env.VITE_SCHOOL_ENDPOINT
 
 export class ApiService {
   static async getSchedule(request: ApiRequest): Promise<ApiResponse> {
-    const response = await fetch(`${API_ENDPOINT}/schedule/${request.StudentID}`, {
-      method: 'GET',
+    const response = await fetch(SCHOOL_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
     });
 
     if (!response.ok) {
