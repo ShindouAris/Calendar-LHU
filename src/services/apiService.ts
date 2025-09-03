@@ -1,5 +1,5 @@
 import { ApiRequest, ApiResponse } from '@/types/schedule';
-import { ForecastDay, HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
+import { HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
 const API_ENDPOINT = 'https://calenapi.chisadin.site'
 

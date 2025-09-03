@@ -144,7 +144,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                   <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-3">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Một số mốc giờ</div>
                     <div className="grid grid-cols-4 gap-2 text-xs">
-                      {d.hour.filter((_, i) => [6, 9, 12, 15].includes(new Date(_.time).getHours())).map((h) => (
+                      {d.hour.filter((_, __) => [6, 9, 12, 15].includes(new Date(_.time).getHours())).map((h) => (
                         <div key={h.time} className="p-2 rounded-md bg-gray-50 dark:bg-gray-700/50">
                           <div className="font-medium">{formatHour(h.time)}</div>
                           <div className="flex items-center gap-1">
