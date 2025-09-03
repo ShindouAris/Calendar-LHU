@@ -1,8 +1,7 @@
 import { ApiRequest, ApiResponse } from '@/types/schedule';
 import { ForecastDay, HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
-// const API_ENDPOINT = 'https://tapi.lhu.edu.vn/calen/auth/XemLich_LichSinhVien';
-const API_ENDPOINT = 'http://localhost:3000'
+const API_ENDPOINT = 'https://calenapi.chisadin.site'
 
 export class ApiService {
   static async getSchedule(request: ApiRequest): Promise<ApiResponse> {
