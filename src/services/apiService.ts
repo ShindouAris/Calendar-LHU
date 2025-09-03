@@ -1,7 +1,7 @@
 import { ApiRequest, ApiResponse } from '@/types/schedule';
 import { HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
-const API_ENDPOINT = import.meta.env.API_URL 
+const API_ENDPOINT = import.meta.env.VITE_API_URL 
 const SCHOOL_ENDPOINT = import.meta.env.VITE_SCHOOL_ENDPOINT
 
 export class ApiService {
