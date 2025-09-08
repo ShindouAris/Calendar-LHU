@@ -21,6 +21,7 @@ import { toast } from '@/hooks/use-toast';
 import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
 import WeatherPage from '@/components/WeatherPage';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -28,13 +29,31 @@ export const StudentSchedule: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<ApiResponse | null>(null);
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
-  const [page, setPage] = useState("home"); // "home", "schedule", "timetable", or "weather"
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [page, setPage] = useState("home"); // synced with URL
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
   useEffect(() => {
     cacheService.init();
   }, []);
+
+  // Sync page state with URL on first load and when pathname changes
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/home") {
+      setPage("home");
+    } else if (path.startsWith("/schedule")) {
+      setPage("schedule");
+    } else if (path.startsWith("/timetable")) {
+      setPage("timetable");
+    } else if (path.startsWith("/weather")) {
+      setPage("weather");
+    } else {
+      setPage("home");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchCurrentWeather = async () => {
@@ -119,6 +138,7 @@ export const StudentSchedule: React.FC = () => {
     setShowFullSchedule(false);
     setError(null);
     setPage("home");
+    navigate("/home");
   };
 
   const handleRefresh = () => {
@@ -131,15 +151,19 @@ export const StudentSchedule: React.FC = () => {
     if (newPage === "home") {
       setPage("home");
       setShowFullSchedule(false);
+      navigate("/home");
     } else if (newPage === "schedule") {
       setPage("schedule");
       setShowFullSchedule(true);
+      navigate("/schedule");
     } else if (newPage === "timetable") {
       setPage("timetable");
       setShowFullSchedule(false);
+      navigate("/timetable");
     } else if (newPage === "weather") {
       setPage("weather");
       setShowFullSchedule(false);
+      navigate("/weather");
     }
   };
 
@@ -418,7 +442,7 @@ export const StudentSchedule: React.FC = () => {
             studentName={studentInfo?.HoTen}
           />
         ) : page === "weather" ? (
-          <WeatherPage onBackToSchedule={() => setPage('schedule')} />
+          <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
         ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (
