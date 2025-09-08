@@ -100,20 +100,32 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
   };
 
   const EventComponent = ({ event }: { event: CalendarEvent }) => {
-    const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
+    const status = getRealtimeStatus(
+      event.start.toISOString(),
+      event.end.toISOString()
+    );
     const is_cancelled = event.resource.TinhTrang !== 0;
     const statusText = getStatusText(status, is_cancelled);
-    
+  
     return (
-      <div className="p-1 text-xs">
-        <div className="font-semibold mb-1 truncate text-white">{event.title}</div>
-        <div className="text-xs opacity-90 text-white">
-          <div className="truncate">{event.resource.TenPhong || event.resource.OnlineLink || 'Không có địa điểm'}</div>
-          <div className="truncate">{event.resource.GiaoVien}</div>
+      <div className="p-1 text-sm sm:text-xs">
+        <div className="font-semibold mb-1 line-clamp-2 text-white">
+          {event.title}
+        </div>
+        <div className="opacity-90 text-white space-y-0.5">
+          <div className="line-clamp-1">
+            {event.resource.TenPhong ||
+              event.resource.OnlineLink ||
+              "Không có địa điểm"}
+          </div>
+          <div className="line-clamp-1">{event.resource.GiaoVien}</div>
           <div className="mt-1">
-            <Badge 
-              variant="secondary" 
-              className={`text-xs px-1 py-0.5 ${getStatusColor(status, is_cancelled)} text-white border-0`}
+            <Badge
+              variant="secondary"
+              className={`text-xs px-1.5 py-0.5 ${getStatusColor(
+                status,
+                is_cancelled
+              )} text-white border-0`}
             >
               {statusText}
             </Badge>

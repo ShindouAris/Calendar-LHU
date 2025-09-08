@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -46,7 +45,7 @@ export const Layout: React.FC<LayoutProps> = ({
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 flex">
+      <div className="relative z-10 flex w-full">
         {/* Sidebar */}
         <Sidebar
           onBack={onBack}
@@ -64,7 +63,7 @@ export const Layout: React.FC<LayoutProps> = ({
         />
 
         {/* Main Content */}
-        <div className="flex-1 lg:ml-0">
+        <div className="flex-1 w-full min-w-0 lg:ml-0">
           {/* Mobile Header */}
           <div className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between p-4">
@@ -84,7 +83,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Content */}
-          <main className="relative">
+          <main className="relative w-full min-w-0">
             {children}
           </main>
         </div>

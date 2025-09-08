@@ -360,7 +360,7 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </CardHeader>
           
-          <CardContent className="relative">
+          <CardContent className={`relative ${page!=="home" && page!=="schedule" && ("hidden")}`}>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <StatsCard
                 title="Tổng số tiết"
