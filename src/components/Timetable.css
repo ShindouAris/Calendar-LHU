@@ -220,14 +220,76 @@
   .rbc-toolbar-label {
     text-align: center;
     order: -1;
+    font-size: 16px;
   }
   
   .rbc-btn-group {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+  
+  .rbc-btn-group button {
+    font-size: 12px;
+    padding: 4px 8px;
+    min-width: auto;
   }
   
   .rbc-event {
     font-size: 10px;
     padding: 1px 2px;
+    line-height: 1.2;
+  }
+  
+  .rbc-header {
+    padding: 4px 2px;
+    font-size: 12px;
+  }
+  
+  .rbc-time-slot {
+    font-size: 11px;
+  }
+  
+  .rbc-time-gutter {
+    font-size: 11px;
+  }
+  
+  .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+  
+  .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rbc-toolbar-label {
+    font-size: 14px;
+  }
+  
+  .rbc-btn-group button {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+  
+  .rbc-event {
+    font-size: 9px;
+    padding: 1px;
+  }
+  
+  .rbc-header {
+    padding: 2px 1px;
+    font-size: 11px;
+  }
+  
+  .rbc-time-slot {
+    font-size: 10px;
+  }
+  
+  .rbc-time-gutter {
+    font-size: 10px;
   }
 }

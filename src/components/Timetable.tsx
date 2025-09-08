@@ -106,16 +106,18 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
     
     return (
       <div className="p-1 text-xs">
-        <div className="font-semibold mb-1 truncate">{event.title}</div>
-        <div className="text-xs opacity-90">
-          <div>{event.resource.TenPhong || event.resource.OnlineLink || 'Không có địa điểm'}</div>
-          <div>{event.resource.GiaoVien}</div>
-          <Badge 
-            variant="secondary" 
-            className={`text-xs px-1 py-0.5 ${getStatusColor(status, is_cancelled)} text-white`}
-          >
-            {statusText}
-          </Badge>
+        <div className="font-semibold mb-1 truncate text-white">{event.title}</div>
+        <div className="text-xs opacity-90 text-white">
+          <div className="truncate">{event.resource.TenPhong || event.resource.OnlineLink || 'Không có địa điểm'}</div>
+          <div className="truncate">{event.resource.GiaoVien}</div>
+          <div className="mt-1">
+            <Badge 
+              variant="secondary" 
+              className={`text-xs px-1 py-0.5 ${getStatusColor(status, is_cancelled)} text-white border-0`}
+            >
+              {statusText}
+            </Badge>
+          </div>
         </div>
       </div>
     );
@@ -138,49 +140,56 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
       month: 'Tháng',
       week: 'Tuần',
       day: 'Ngày',
+      agenda: 'Danh sách',
     };
 
     return (
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={goToToday}
-            className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            Hôm nay
-          </button>
-          <button
-            onClick={goToPrev}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-          >
-            ←
-          </button>
-          <button
-            onClick={goToNext}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-          >
-            →
-          </button>
-        </div>
-        
-        <div className="text-lg font-semibold text-gray-900 dark:text-white">
-          {toolbar.label}
-        </div>
-        
-        <div className="flex items-center gap-1 bg-gray-100 rounded-md p-1">
-          {Object.entries(viewNames).map(([key, name]) => (
+      <div className="flex flex-col gap-3 mb-4">
+        {/* Navigation Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
-              key={key}
-              onClick={() => toolbar.onView(key)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                toolbar.view === key
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+              onClick={goToToday}
+              className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
             >
-              {name}
+              Hôm nay
             </button>
-          ))}
+            <button
+              onClick={goToPrev}
+              className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors"
+            >
+              ←
+            </button>
+            <button
+              onClick={goToNext}
+              className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors"
+            >
+              →
+            </button>
+          </div>
+          
+          <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white text-center">
+            {toolbar.label}
+          </div>
+        </div>
+        
+        {/* View Controls */}
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-md p-1">
+            {Object.entries(viewNames).map(([key, name]) => (
+              <button
+                key={key}
+                onClick={() => toolbar.onView(key)}
+                className={`px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium transition-colors ${
+                  toolbar.view === key
+                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -203,34 +212,34 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
     <div className="space-y-6">
       {/* Thống kê nhanh */}
       <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50">
-        <CardHeader>
-          <CardTitle className="text-lg text-gray-900 dark:text-white">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg text-gray-900 dark:text-white">
             Thống kê lịch học
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{schedules.length}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Tổng số tiết</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{schedules.length}</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Tổng số tiết</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+            <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-green-600">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 2).length}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Sắp diễn ra</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Sắp diễn ra</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-yellow-600">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 1).length}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Đang diễn ra</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Đang diễn ra</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600">
+            <div className="text-center p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+              <div className="text-xl sm:text-2xl font-bold text-gray-600">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 3).length}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Đã kết thúc</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Đã kết thúc</div>
             </div>
           </div>
         </CardContent>
@@ -238,13 +247,13 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
 
       {/* Calendar */}
       <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-lg text-gray-900 dark:text-white">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base sm:text-lg text-gray-900 dark:text-white">
             Lịch học {studentName ? `của ${studentName}` : ''}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="h-[600px]">
+        <CardContent className="p-3 sm:p-6">
+          <div className="h-[400px] sm:h-[500px] lg:h-[600px]">
             <Calendar
               localizer={localizer}
               events={events}

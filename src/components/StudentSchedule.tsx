@@ -9,7 +9,7 @@ import { EmptySchedule } from './EmptySchedule';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { StatsCard } from './StatsCard';
-import { Header } from './Header';
+import { Layout } from './Layout';
 
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
@@ -127,56 +127,6 @@ export const StudentSchedule: React.FC = () => {
     }
   };
 
-  if (error) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <Button
-              onClick={handleBackToInput}
-              variant="ghost"
-              className="mb-4 flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Quay lại
-            </Button>
-          </div>
-          <ErrorMessage message={error} onRetry={handleRetry} />
-        </div>
-      </div>
-    );
-  }
-
-  if (!scheduleData) {
-    return (
-      <div className="min-h-screen py-6 sm:py-8 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
-              <GraduationCap className="h-10 w-10 text-white" />
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
-              Lịch Học Sinh Viên - LHU
-            </h1>
-            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Tra cứu lịch học nhanh chóng
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center">
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <div className="max-w-2xl mx-auto">
-              <StudentIdInput onSubmit={fetchSchedule} loading={loading} />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   const handleChangeView = (newPage: string) => {
     if (newPage === "home") {
       setPage("home");
@@ -191,8 +141,71 @@ export const StudentSchedule: React.FC = () => {
       setPage("weather");
       setShowFullSchedule(false);
     }
+  };
+
+  if (error) {
+    return (
+      <Layout
+        showBack={true}
+        onBack={handleBackToInput}
+        page={page}
+        onPageChange={handleChangeView}
+        title="Lịch Học Sinh Viên - LHU"
+      >
+        <div className="min-h-screen py-8 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <Button
+                onClick={handleBackToInput}
+                variant="ghost"
+                className="mb-4 flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Quay lại
+              </Button>
+            </div>
+            <ErrorMessage message={error} onRetry={handleRetry} />
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
+  if (!scheduleData) {
+    return (
+      <Layout
+        page={page}
+        onPageChange={handleChangeView}
+        title="Lịch Học Sinh Viên - LHU"
+      >
+        <div className="min-h-screen py-6 sm:py-8 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-10 sm:mb-12">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
+                <GraduationCap className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
+                Lịch Học Sinh Viên - LHU
+              </h1>
+              <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                Tra cứu lịch học nhanh chóng
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center">
+                <LoadingSpinner />
+              </div>
+            ) : (
+              <div className="max-w-2xl mx-auto">
+                <StudentIdInput onSubmit={fetchSchedule} loading={loading} />
+              </div>
+            )}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const studentInfo = scheduleData.data[0]?.[0];
   const weekInfo = scheduleData.data[1]?.[0];
@@ -298,18 +311,17 @@ export const StudentSchedule: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <Header
-          showBack={true}
-          showRefresh={true}
-          onBack={handleBackToInput}
-          onRefresh={handleRefresh}
-          page={page}
-          onPageChange={handleChangeView}
-          title="Lịch Học Sinh Viên - LHU"
-        />
+    <Layout
+      showBack={true}
+      showRefresh={true}
+      onBack={handleBackToInput}
+      onRefresh={handleRefresh}
+      page={page}
+      onPageChange={handleChangeView}
+      title="Lịch Học Sinh Viên - LHU"
+    >
+      <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
 
         {/* Student Info Card */}
         <Card className="mb-8 overflow-hidden border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-900">
@@ -471,7 +483,8 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </>
         )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
