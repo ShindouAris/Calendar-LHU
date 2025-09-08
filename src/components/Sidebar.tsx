@@ -10,9 +10,10 @@ import {
   RefreshCw,
   ArrowLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GitHub } from './icons/github';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -77,6 +78,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Thời tiết',
       icon: Sun,
       description: 'Thông tin thời tiết hiện tại'
+    },
+    {
+      id: 'GitHub',
+      url: "https://github.com/ShindouAris/Calendar-LHU.git",
+      label: "Ghé thăm repo",
+      icon: GitHub,
+      description: 'Xem mã nguồn của trang này'
     }
   ];
 
@@ -171,6 +179,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <button
                         key={item.id}
                         onClick={() => {
+                          if (item.url) {
+                            window.location.href = item.url
+                          }
                           onPageChange?.(item.id as any);
                           // Close sidebar on mobile after selection
                           if (window.innerWidth < 1024) {
