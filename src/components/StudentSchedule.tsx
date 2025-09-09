@@ -23,6 +23,7 @@ import type { WeatherCurrentAPIResponse } from '@/types/weather';
 import WeatherPage from '@/components/WeatherPage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthStorage } from '@/types/user';
+import { MarkPage } from './StudentMark';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,10 @@ export const StudentSchedule: React.FC = () => {
       setPage("timetable");
     } else if (path.startsWith("/weather")) {
       setPage("weather");
-    } else {
+    } else if (path.startsWith("/mark")) {
+      setPage("mark")
+    } 
+    else {
       setPage("home");
     }
   }, [location.pathname]);
@@ -180,8 +184,31 @@ export const StudentSchedule: React.FC = () => {
       setPage("weather");
       setShowFullSchedule(false);
       navigate("/weather");
+    } else if (newPage === "mark") {
+      setPage("mark")
+      setShowFullSchedule(false);
+      navigate("/mark")
     }
   };
+
+  // Ưu tiên hiển thị trang Điểm để không bị chặn bởi các nhánh !scheduleData hoặc error
+  if (page === "mark") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title="Lịch Học Sinh Viên - LHU"
+      >
+        <div className="min-h-screen py-6 sm:py-8 px-4">
+          <div className="max-w-6xl mx-auto">
+            <MarkPage onBackToSchedule={() => handleChangeView('schedule')} />
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (error) {
     return (
@@ -211,7 +238,7 @@ export const StudentSchedule: React.FC = () => {
     );
   }
 
-  if (!scheduleData) {
+  if (!scheduleData ) {
     return (
       <Layout
         page={page}
@@ -471,6 +498,8 @@ export const StudentSchedule: React.FC = () => {
           />
         ) : page === "weather" ? (
           <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
+        ) : page === "mark" ? (
+          <MarkPage />
         ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (

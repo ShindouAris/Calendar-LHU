@@ -21,6 +21,21 @@ export interface AuthState {
   user: UserResponse | null;
 }
 
+export interface MonHoc {
+  ma_mon_hoc: string;
+  ten_mon_hoc: string;
+  he_so: string;
+  diem_thanh_phan: string;
+  diem_trung_binh: string;
+}
+
+export interface HocKyGroup {
+  semesters: {
+      [hocKy: string]: MonHoc[];
+  };
+  sync_token: string | null;
+}
+
 export const AUTH_STORAGE_KEY = 'auth_user';
 
 export const AuthStorage = {

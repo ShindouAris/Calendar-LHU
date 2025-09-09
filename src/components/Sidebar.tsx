@@ -11,7 +11,8 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronDown,
-  LogOut
+  LogOut,
+  LandPlot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHub } from './icons/github';
@@ -22,7 +23,7 @@ interface SidebarProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
@@ -83,6 +84,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Thời tiết',
       icon: Sun,
       description: 'Thông tin thời tiết hiện tại'
+    },
+    {
+      id: "mark",
+      label: "Xem điểm thi", 
+      icon: LandPlot,
+      description: "Xem điểm thi của bạn (cần đăng nhập)"
     },
     {
       id: 'GitHub',

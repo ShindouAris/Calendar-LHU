@@ -13,7 +13,7 @@ interface LayoutProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
