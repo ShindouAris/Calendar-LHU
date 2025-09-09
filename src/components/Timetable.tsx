@@ -148,7 +148,7 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
                 is_cancelled
               )} text-white border-0`}
             >
-              {isMobile ? statusText.substring(0, 8) : statusText}
+              {statusText}
             </Badge>
           </div>
         </div>
@@ -170,9 +170,9 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
     };
 
     const viewNames = {
-      month: isMobile ? 'T' : 'Tháng',
-      week: isMobile ? 'Tu' : 'Tuần',
-      day: isMobile ? 'N' : 'Ngày'
+      month: isMobile ? 'M' : 'Tháng',
+      week: isMobile ? 'W' : 'Tuần',
+      day: isMobile ? 'D' : 'Ngày'
     };
 
     return (

@@ -4,11 +4,14 @@ import App from './App.tsx';
 import './index.css';
 import { registerSW } from 'virtual:pwa-register';
 import { Analytics } from "@vercel/analytics/react"
+import { BrowserRouter } from 'react-router-dom';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
-    <Analytics />
+    <BrowserRouter>
+      <App />
+      <Analytics />
+    </BrowserRouter>
   </StrictMode>
 );
 

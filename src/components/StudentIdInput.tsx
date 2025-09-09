@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, History, X, Clock, GraduationCap, Sparkles } from 'lucide-react';
 import { LocalStorageService } from '@/services/localStorageService';
+import { AuthStorage } from '@/types/user';
+import { Link } from 'react-router-dom';
 
 interface StudentIdInputProps {
   onSubmit: (studentId: string) => void;
@@ -17,6 +19,7 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
   const [history, setHistory] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const loggedInUser = useMemo(() => AuthStorage.getUser(), []);
 
   useEffect(() => {
     loadHistory();
@@ -101,6 +104,27 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
             </div>
           )}
               </Button>
+              {loggedInUser?.UserID ? (
+                <Button
+                  type="button"
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto ml-0 sm:ml-2"
+                  disabled={loading}
+                  onClick={() => onSubmit(loggedInUser.UserID)}
+                >
+                  Lấy lịch của tôi
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto ml-0 sm:ml-2"
+                >
+                  <Link to="/login">Đăng nhập</Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>

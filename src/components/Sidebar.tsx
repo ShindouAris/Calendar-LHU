@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronDown,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHub } from './icons/github';
@@ -27,6 +28,8 @@ interface SidebarProps {
   onThemeToggle?: () => void;
   isDark?: boolean;
   isOpen?: boolean;
+  isAuth?: boolean;
+  onLogout?: () => Promise<string | void>
   onToggle?: () => void;
 }
 
@@ -42,6 +45,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onThemeToggle,
   isDark = false,
   isOpen = false,
+  isAuth = false,
+  onLogout,
   onToggle
 }) => {
   const [expandedItems, setExpandedItems] = useState<string[]>(['navigation']);
@@ -109,6 +114,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: isDark ? Sun : Moon,
       action: onThemeToggle,
       description: 'Chuyển đổi chế độ sáng/tối'
+    }] : []),
+    ...(isAuth && onLogout ? [{
+      id: 'logout',
+      label: "Đăng xuất tài khoản ME",
+      icon: LogOut,
+      action: onLogout,
+      description: "Đăng xuất tài khoản sinh viên khỏi web"
     }] : [])
   ];
 

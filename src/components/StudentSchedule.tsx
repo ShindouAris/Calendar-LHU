@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download } from 'lucide-react';
+import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School } from 'lucide-react';
 
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './ScheduleCard';
@@ -21,6 +21,8 @@ import { toast } from '@/hooks/use-toast';
 import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
 import WeatherPage from '@/components/WeatherPage';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AuthStorage } from '@/types/user';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -28,13 +30,46 @@ export const StudentSchedule: React.FC = () => {
   const [scheduleData, setScheduleData] = useState<ApiResponse | null>(null);
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [showFullSchedule, setShowFullSchedule] = useState(false);
-  const [page, setPage] = useState("home"); // "home", "schedule", "timetable", or "weather"
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [page, setPage] = useState("home"); // synced with URL
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
+  const [avatar, setAvatar] = useState("")
+  const user = AuthStorage.getUser()
 
   useEffect(() => {
     cacheService.init();
-  }, []);
+  }, [AuthStorage.getUser()?.UserID]);
+
+  useEffect(() => {
+    getAvatar();
+  }, [])
+  const getAvatar = () => {
+    const isLogin = AuthStorage.isLoggedIn()
+    if (isLogin) {
+      const user  = AuthStorage.getUser()
+      if (user?.Avatar) {
+        setAvatar(user.Avatar)
+      }
+    }
+  }
+
+  // Sync page state with URL on first load and when pathname changes
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/home") {
+      setPage("home");
+    } else if (path.startsWith("/schedule")) {
+      setPage("schedule");
+    } else if (path.startsWith("/timetable")) {
+      setPage("timetable");
+    } else if (path.startsWith("/weather")) {
+      setPage("weather");
+    } else {
+      setPage("home");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const fetchCurrentWeather = async () => {
@@ -119,6 +154,7 @@ export const StudentSchedule: React.FC = () => {
     setShowFullSchedule(false);
     setError(null);
     setPage("home");
+    navigate("/home");
   };
 
   const handleRefresh = () => {
@@ -131,15 +167,19 @@ export const StudentSchedule: React.FC = () => {
     if (newPage === "home") {
       setPage("home");
       setShowFullSchedule(false);
+      navigate("/home");
     } else if (newPage === "schedule") {
       setPage("schedule");
       setShowFullSchedule(true);
+      navigate("/schedule");
     } else if (newPage === "timetable") {
       setPage("timetable");
       setShowFullSchedule(false);
+      navigate("/timetable");
     } else if (newPage === "weather") {
       setPage("weather");
       setShowFullSchedule(false);
+      navigate("/weather");
     }
   };
 
@@ -331,12 +371,12 @@ export const StudentSchedule: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                    <User className="h-8 w-8 text-white" />
+                    {avatar ? <img src={avatar} alt='avatar' onError={() => setAvatar("")} /> : <User className="h-8 w-8 text-white" /> }
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <CardTitle className="text-xl sm:text-2xl text-gray-900 dark:text-white mb-2">
+                  <CardTitle className="text-left text-xl sm:text-2xl text-gray-900 dark:text-white mb-2">
                     {studentInfo?.HoTen || 'Không có thông tin'}
                   </CardTitle>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
@@ -345,6 +385,18 @@ export const StudentSchedule: React.FC = () => {
                       Mã SV: <span className="font-mono font-semibold">{currentStudentId}</span>
                     </span>
                   </div>
+                  {user && user.UserID === currentStudentId && 
+                      <>
+                        <div className='flex flex-wrap gap-1 text-sm'>
+                          <TestTubes className='h-4 w-4' />
+                          Thuộc: <span className='font-mono font-semibold'>{user.DepartmentName}</span>
+                        </div>
+                        <div className='flex flex-wrap gap-1 text-sm'>
+                          <School className='h-4 w-4' />
+                          Lớp: <span className='font-mono font-semibold'>{user.Class}</span>
+                        </div>
+                      </>
+                  } 
                 </div>
               </div>
 
@@ -418,7 +470,7 @@ export const StudentSchedule: React.FC = () => {
             studentName={studentInfo?.HoTen}
           />
         ) : page === "weather" ? (
-          <WeatherPage onBackToSchedule={() => setPage('schedule')} />
+          <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
         ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (
