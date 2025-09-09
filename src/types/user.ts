@@ -56,7 +56,10 @@ export const AuthStorage = {
     }
   },
   isLoggedIn(): boolean {
-    return !!this.getUser();
+    const user = this.getUser();
+    const auth_token = localStorage.getItem("access_token");
+    if (user && auth_token) return true;
+    else return false;
   },
   deleteUser() {
     localStorage.removeItem(AUTH_STORAGE_KEY)

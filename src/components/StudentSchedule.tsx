@@ -17,7 +17,7 @@ import { ApiResponse } from '@/types/schedule';
 import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'react-hot-toast';
 import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
 import WeatherPage from '@/components/WeatherPage';
@@ -119,10 +119,7 @@ export const StudentSchedule: React.FC = () => {
       setScheduleData(response);
       setCurrentStudentId(studentId);
       if (!navigator.onLine) {
-        toast({
-          title: 'Đang ngoại tuyến',
-          description: 'Đã đồng bộ dữ liệu khi có mạng trở lại.',
-        });
+        toast.error('Đang ngoại tuyến');
       }
     } catch (err) {
       // Thử fallback sang dữ liệu đã lưu (kể cả khi đã hết hạn) để hỗ trợ offline
@@ -131,10 +128,7 @@ export const StudentSchedule: React.FC = () => {
         if (stale) {
           setScheduleData(stale);
           setCurrentStudentId(studentId);
-          toast({
-            title: 'Hiển thị dữ liệu offline',
-            description: 'Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.',
-          });
+          toast.error('Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.');
         } else {
           setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
         }
@@ -371,9 +365,9 @@ export const StudentSchedule: React.FC = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast({ title: 'Đã xuất tệp ICS', description: 'Bạn có thể nhập vào Google/Apple Calendar.' });
+      toast.success('Đã xuất tệp ICS, Bạn có thể nhập vào Google/Apple Calendar.');
     } catch (e) {
-      toast({ title: 'Xuất ICS thất bại', description: 'Vui lòng thử lại sau.' });
+      toast.error('Xuất ICS thất bại');
     }
   };
 

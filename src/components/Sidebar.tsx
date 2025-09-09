@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHub } from './icons/github';
+import { toast } from 'react-hot-toast';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -60,7 +61,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const navigationItems = [
+  interface NavigationItem {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    description: string;
+    url?: string;
+    authrequired?: boolean;
+  }
+
+  const navigationItems: NavigationItem[] = [
     {
       id: 'home',
       label: 'Trang chủ',
@@ -89,7 +99,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: "mark",
       label: "Xem điểm thi", 
       icon: LandPlot,
-      description: "Xem điểm thi của bạn (cần đăng nhập)"
+      description: "Xem điểm thi của bạn (cần đăng nhập)",
+      authrequired: true,
     },
     {
       id: 'GitHub',
@@ -143,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto",
+        "fixed top-0 left-0 z-50 h-full w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
@@ -200,6 +211,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onClick={() => {
                           if (item.url) {
                             window.location.href = item.url
+                          }
+                          if (item.authrequired && !isAuth) {
+                            toast.error("Vui lòng đăng nhập để truy cập trang này")
+                            return;
                           }
                           onPageChange?.(item.id as any);
                           // Close sidebar on mobile after selection

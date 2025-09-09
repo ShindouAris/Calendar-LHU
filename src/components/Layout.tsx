@@ -3,7 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { authService } from '@/services/authService';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { AuthStorage } from '@/types/user';
 
 interface LayoutProps {
@@ -44,11 +44,11 @@ export const Layout: React.FC<LayoutProps> = ({
     try {
       const logoutmsg: string | null = await authService.logOut();
       if (logoutmsg) {
-        toast(logoutmsg)
+        toast.success(logoutmsg)
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast(error.message)
+        toast.error(error.message)
       }
     }
     
