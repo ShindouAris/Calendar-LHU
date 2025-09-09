@@ -1,4 +1,4 @@
-import { AuthStorage, UserResponse } from '@/types/user';
+import { AuthStorage, HocKyGroup, UserResponse } from '@/types/user';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -86,6 +86,32 @@ export const authService = {
     AuthStorage.deleteUser()
     localStorage.removeItem("access_token")
     return "Đăng xuất thành công" 
+  },
+  async getMark(): Promise<HocKyGroup | undefined> {
+    const access_token = localStorage.getItem("access_token")
+    if (!access_token) {
+      throw new Error("Hãy đăng nhập để xem điểm của bạn")
+    }
+    try {
+      const response = await fetch(`${API_URL}/mark`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          accessToken: access_token
+        })
+      })
+      if (!response.ok) {
+        throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
+      }
+      const data: HocKyGroup = await response.json()
+      return data
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message)
+      }
+    }
   }
 };
 

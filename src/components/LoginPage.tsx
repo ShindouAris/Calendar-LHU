@@ -7,9 +7,9 @@ import { Layout } from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { AuthStorage } from '@/types/user';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'react-hot-toast';
 import { ClientJS } from 'clientjs';
-
+import { Loader2, LogIn } from 'lucide-react';
 
 function buildDeviceInfo(): string {
   try {
@@ -49,10 +49,10 @@ export default function LoginPage() {
       await authService.login({ DeviceInfo: deviceInfo, UserID: userId, Password: password });
       const user = await authService.getUserInfo();
       AuthStorage.setUser(user);
-      toast({ title: 'Đăng nhập thành công' });
+      toast.success('Đăng nhập thành công');
       navigate('/');
     } catch (err) {
-      toast({ title: 'Đăng nhập thất bại', description: err instanceof Error ? err.message : 'Vui lòng thử lại' });
+      toast.error(err instanceof Error ? err.message : 'Vui lòng thử lại');
     } finally {
       setLoading(false);
     }
@@ -60,26 +60,55 @@ export default function LoginPage() {
 
   return (
     <Layout title="Đăng nhập" page="home" onPageChange={() => {}}>
-      <div className="min-h-screen py-8 px-4">
-        <div className="max-w-md mx-auto">
-          <Card className="border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle>Đăng nhập</CardTitle>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <Card className="border-0 shadow-2xl backdrop-blur-md bg-white/90 dark:bg-gray-900/90">
+            <CardHeader className="text-center space-y-2">
+              <CardTitle className="text-2xl font-bold">Chào mừng trở lại 👋</CardTitle>
+              <p className="text-sm text-muted-foreground">Đăng nhập để tiếp tục</p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <Label htmlFor="userid">Mã sinh viên</Label>
-                  <Input id="userid" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="Mã sinh viên của bạn" />
+                  <Input
+                    id="userid"
+                    value={userId}
+                    onChange={(e) => setUserId(e.target.value)}
+                    placeholder="Mã sinh viên của bạn"
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="password">Mật khẩu</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="mt-1"
+                  />
                 </div>
-                <Button type="submit" disabled={loading || !userId || !password} className="w-full">
-                  {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                <Button
+                  type="submit"
+                  disabled={loading || !userId || !password}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin h-4 w-4" /> Đang đăng nhập...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4" /> Đăng nhập
+                    </>
+                  )}
                 </Button>
               </form>
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                  Quay lại <a onClick={() => navigate('/')} className="text-indigo-600 hover:underline">Trang chủ</a>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -87,5 +116,3 @@ export default function LoginPage() {
     </Layout>
   );
 }
-
-

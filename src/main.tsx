@@ -5,12 +5,14 @@ import './index.css';
 import { registerSW } from 'virtual:pwa-register';
 import { Analytics } from "@vercel/analytics/react"
 import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <App />
       <Analytics />
+      <Toaster position='top-center' />
     </BrowserRouter>
   </StrictMode>
 );
