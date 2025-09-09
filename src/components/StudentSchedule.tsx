@@ -376,7 +376,7 @@ export const StudentSchedule: React.FC = () => {
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <CardTitle className="text-xl sm:text-2xl text-gray-900 dark:text-white mb-2">
+                  <CardTitle className="text-left text-xl sm:text-2xl text-gray-900 dark:text-white mb-2">
                     {studentInfo?.HoTen || 'Không có thông tin'}
                   </CardTitle>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
@@ -385,7 +385,7 @@ export const StudentSchedule: React.FC = () => {
                       Mã SV: <span className="font-mono font-semibold">{currentStudentId}</span>
                     </span>
                   </div>
-                  {user && user.UserID === currentStudentId ? 
+                  {user && user.UserID === currentStudentId && 
                       <>
                         <div className='flex flex-wrap gap-1 text-sm'>
                           <TestTubes className='h-4 w-4' />
@@ -396,8 +396,6 @@ export const StudentSchedule: React.FC = () => {
                           Lớp: <span className='font-mono font-semibold'>{user.Class}</span>
                         </div>
                       </>
-                      : 
-                      ""
                   } 
                 </div>
               </div>
