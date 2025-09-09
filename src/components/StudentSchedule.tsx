@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download } from 'lucide-react';
+import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes } from 'lucide-react';
 
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './ScheduleCard';
@@ -36,6 +36,7 @@ export const StudentSchedule: React.FC = () => {
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
   const [avatar, setAvatar] = useState("")
+  const user = AuthStorage.getUser()
 
   useEffect(() => {
     cacheService.init();
@@ -384,6 +385,14 @@ export const StudentSchedule: React.FC = () => {
                       Mã SV: <span className="font-mono font-semibold">{currentStudentId}</span>
                     </span>
                   </div>
+                  {user ? 
+                      <div className='flex flex-wrap gap-1 text-sm'>
+                        <TestTubes className='h-4 w-4' />
+                        Thuộc khoa: <span className='font-mono font-semibold'>{user.DepartmentName}</span>
+                      </div> 
+                      : 
+                      ""
+                  } 
                 </div>
               </div>
 
