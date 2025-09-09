@@ -22,6 +22,7 @@ import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
 import WeatherPage from '@/components/WeatherPage';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AuthStorage } from '@/types/user';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -34,10 +35,24 @@ export const StudentSchedule: React.FC = () => {
   const [page, setPage] = useState("home"); // synced with URL
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
+  const [avatar, setAvatar] = useState("")
 
   useEffect(() => {
     cacheService.init();
-  }, []);
+  }, [AuthStorage.getUser()?.UserID]);
+
+  useEffect(() => {
+    getAvatar();
+  }, [])
+  const getAvatar = () => {
+    const isLogin = AuthStorage.isLoggedIn()
+    if (isLogin) {
+      const user  = AuthStorage.getUser()
+      if (user?.Avatar) {
+        setAvatar(user.Avatar)
+      }
+    }
+  }
 
   // Sync page state with URL on first load and when pathname changes
   useEffect(() => {
@@ -355,7 +370,7 @@ export const StudentSchedule: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                    <User className="h-8 w-8 text-white" />
+                    {avatar ? <img src={avatar} alt='avatar' onError={() => setAvatar("")} /> : <User className="h-8 w-8 text-white" /> }
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
                 </div>
