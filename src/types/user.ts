@@ -42,6 +42,9 @@ export const AuthStorage = {
   },
   isLoggedIn(): boolean {
     return !!this.getUser();
+  },
+  deleteUser() {
+    localStorage.removeItem(AUTH_STORAGE_KEY)
   }
 };
 

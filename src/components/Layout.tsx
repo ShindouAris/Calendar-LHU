@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
+import { authService } from '@/services/authService';
+import { toast } from 'sonner';
+import { AuthStorage } from '@/types/user';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,10 +34,25 @@ export const Layout: React.FC<LayoutProps> = ({
   isDark = false
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const loggedInUser = AuthStorage.isLoggedIn()
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  const handleLogout = async () => {
+    try {
+      const logoutmsg: string | null = await authService.logOut();
+      if (logoutmsg) {
+        toast(logoutmsg)
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast(error.message)
+      }
+    }
+    
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -59,6 +77,8 @@ export const Layout: React.FC<LayoutProps> = ({
           onThemeToggle={onThemeToggle}
           isDark={isDark}
           isOpen={sidebarOpen}
+          isAuth={loggedInUser}
+          onLogout={handleLogout}
           onToggle={toggleSidebar}
         />
 
