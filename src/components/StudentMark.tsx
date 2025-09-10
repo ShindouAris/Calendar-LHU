@@ -118,7 +118,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[720px] border-collapse text-sm sm:text-base table-auto">
                       <thead>
-                        <tr className="bg-gray-100 dark:bg-gray-700 text-left">
+                        <tr className="bg-gray-100 dark:bg-gray-700 text-center">
                           <th className="px-4 py-2">Mã MH</th>
                           <th className="px-4 py-2">Tên môn học</th>
                           <th className="px-4 py-2">Hệ số</th>
