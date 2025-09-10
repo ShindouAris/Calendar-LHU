@@ -11,10 +11,10 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronDown,
-  LogOut,
-  LandPlot
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PiExamDuotone } from "react-icons/pi";
 import { GitHub } from './icons/github';
 import { toast } from 'react-hot-toast';
 
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: "mark",
       label: "Xem điểm thi", 
-      icon: LandPlot,
+      icon: PiExamDuotone,
       description: "Xem điểm thi của bạn (cần đăng nhập)",
       authrequired: true,
     },
