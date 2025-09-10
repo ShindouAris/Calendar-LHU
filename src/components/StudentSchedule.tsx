@@ -193,7 +193,7 @@ export const StudentSchedule: React.FC = () => {
         onBack={() => handleChangeView('schedule')}
         page={page}
         onPageChange={handleChangeView}
-        title="Lịch Học Sinh Viên - LHU"
+        title="Điểm thi"
       >
         <div className="min-h-screen py-6 sm:py-8 px-4">
           <div className="max-w-6xl mx-auto">
@@ -211,7 +211,7 @@ export const StudentSchedule: React.FC = () => {
         onBack={handleBackToInput}
         page={page}
         onPageChange={handleChangeView}
-        title="Lịch Học Sinh Viên - LHU"
+        title="Đã xảy ra sự cố"
       >
         <div className="min-h-screen py-8 px-4">
           <div className="max-w-6xl mx-auto">
@@ -237,7 +237,7 @@ export const StudentSchedule: React.FC = () => {
       <Layout
         page={page}
         onPageChange={handleChangeView}
-        title="Lịch Học Sinh Viên - LHU"
+        title="Home"
       >
         <div className="min-h-screen py-6 sm:py-8 px-4">
           <div className="max-w-6xl mx-auto">
@@ -246,7 +246,7 @@ export const StudentSchedule: React.FC = () => {
                 <GraduationCap className="h-10 w-10 text-white" />
               </div>
               <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
-                Lịch Học Sinh Viên - LHU
+                LHU Dashboard
               </h1>
               <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                 Tra cứu lịch học nhanh chóng
@@ -379,7 +379,7 @@ export const StudentSchedule: React.FC = () => {
       onRefresh={handleRefresh}
       page={page}
       onPageChange={handleChangeView}
-      title="Lịch Học Sinh Viên - LHU"
+      title="Lịch học"
     >
       <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">

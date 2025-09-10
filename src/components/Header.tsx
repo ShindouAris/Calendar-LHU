@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onRefresh,
   showBack = false,
   showRefresh = false,
-  title = "Lịch Học Sinh Viên - LHU",
+  title = "LHU Dashboard",
   showThemeToggle = false,
   page = "home",
   onPageChange,
