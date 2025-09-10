@@ -1,6 +1,6 @@
 {
-  "name": "Lịch học sinh viên",
-  "short_name": "Lịch học LHU",
+  "name": "LHU dashboard",
+  "short_name": "LHU dashboard",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

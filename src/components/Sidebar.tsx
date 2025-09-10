@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onRefresh,
   showBack = false,
   showRefresh = false,
-  title = "Lịch Học Sinh Viên - LHU",
+  title = "LHU Dashboard",
   showThemeToggle = false,
   page = "home",
   onPageChange,
@@ -166,9 +166,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                  LHU Schedule
+                  LHU Dashboard
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">
                   {title}
                 </p>
               </div>
