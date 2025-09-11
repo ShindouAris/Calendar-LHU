@@ -15,6 +15,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [forecastDays, setForecastDays] = useState<WeatherForeCastAPIResponse | null>(null);
+  const [autoforecastResp, setAutoforecastResp] = useState<HourForecast | null>(null)
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
   useEffect(() => {
@@ -22,12 +23,14 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
       setLoading(true);
       setError(null);
       try {
-        const [forecastResp, currentResp] = await Promise.all([
+        const [forecastResp, currentResp, autoforecastResp] = await Promise.all([
           ApiService.get_3_day_forecast_weather(),
           ApiService.get_current_weather(),
+          ApiService.get_forecast_weather_auto(),
         ]);
         setForecastDays(forecastResp);
         setCurrentWeather(currentResp);
+        setAutoforecastResp(autoforecastResp)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Không thể tải dữ liệu thời tiết');
       } finally {
@@ -93,7 +96,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
             <div className="w-full rounded-xl border border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
                 ⚠️ Lưu ý thời tiết
                 <hr className="my-2 border-yellow-300 dark:border-yellow-700" />
-                {get_warning(currentWeather)}
+                {get_warning(autoforecastResp ? autoforecastResp : currentWeather)}
             </div>
         </CardFooter>
 

@@ -1,4 +1,4 @@
-import { WeatherCurrentAPIResponse } from "@/types/weather";
+import { HourForecast, WeatherCurrentAPIResponse } from "@/types/weather";
 import { computeAQIFromPM } from "./aqiService";
 
 const airQualityMessage = (aqi: number): string | null => {
@@ -20,18 +20,47 @@ const uvMessage = (uv: number): string | null => {
 };
 
 // ---- Nhóm mưa ----
-const rainMessage = (rain: boolean, precip: number): string | null => {
-    if (!rain && precip === 0) return null;
-    if (precip > 7.5) {
+const rainMessage = (
+    rain: boolean,
+    precip: number,
+    chance_of_rain: number | null,
+    has_thunder: boolean
+  ): string | null => {
+    if (!rain || chance_of_rain === null) return null;
+  
+    const HEAVY_RAIN_THRESHOLD = 7.5; // mm
+  
+    // helper để append cảnh báo thunder
+    const addThunder = (msg: string) =>
+      has_thunder ? `${msg} ⚡ Có sấm sét, tránh chỗ trống trải!` : msg;
+  
+    if (chance_of_rain > 80) {
+      if (precip > HEAVY_RAIN_THRESHOLD) {
         const options = [
-            "⛈️ Mưa to, coi chừng ngập đường đi học",
-            "⚠️ Trời mưa lớn, đi học nhớ đi sớm để khỏi kẹt",
-            "🌊 Mưa nhiều, đường có thể trơn trượt"
+          "⛈️ Trời chắc chắn mưa to, cẩn thận ngập đường!",
+          "⚠️ Xác suất mưa cực cao + mưa nặng, đi đâu nhớ chuẩn bị kỹ",
+          "🌊 Khả năng mưa to, đường trơn trượt/ngập"
         ];
-        return options[Math.floor(Math.random() * options.length)];
+        return addThunder(options[Math.floor(Math.random() * options.length)]);
+      }
+      return addThunder("🌧️ Khả năng mưa cao, nhưng có vẻ mưa nhỏ thôi.");
     }
-    return "🌧️ Có thể mưa, thủ sẵn áo mưa/dù";
-};
+  
+    if (chance_of_rain > 50) {
+      return addThunder(
+        precip > HEAVY_RAIN_THRESHOLD
+          ? "🌧️ Dễ có mưa vừa đến to, mang áo mưa cho chắc."
+          : "☔ Có thể có mưa nhỏ, mang dù cho yên tâm."
+      );
+    }
+  
+    if (chance_of_rain > 20) {
+      return addThunder("☁️ Khả năng mưa thấp, nếu có thì cũng chỉ lất phất.");
+    }
+  
+    return null; // dưới 20% = coi như trời nắng 🐧
+  };
+  
 
 // ---- Nhóm nhiệt độ ----
 const tempMessage = (feelslike: number, windchill: number): string | null => {
@@ -57,23 +86,35 @@ const humidityMessage = (humidity: number): string | null => {
     return null;
 };
 
-export const get_warning = (weather_data: WeatherCurrentAPIResponse): string => {
+export const get_warning = (weather_data: WeatherCurrentAPIResponse | HourForecast): string => {
 
-    const weather = weather_data.current
+    let weather
+
+    if ("current" in weather_data) {
+        weather = weather_data.current  
+    } else {
+        weather = weather_data
+    }
 
     const aqi = computeAQIFromPM(weather.air_quality.pm2_5, weather.air_quality.pm10).aqi
     const uv = weather.uv
-    const rain = weather.condition.text.toLowerCase().includes("mưa")
+    const text = weather.condition.text.toLowerCase();
+    const has_thunder = ["sét", "giông"].some(keyword => text.includes(keyword));
+    const rain = text.includes("mưa")
     const humidity = weather.humidity
     const windchill = weather.windchill_c
     const feelslike = weather.feelslike_c
+    let chance_of_rain = null;
+    if ("chance_of_rain" in weather) {
+        chance_of_rain = weather.chance_of_rain
+    }
     const precip = weather.precip_mm;
 
 
     const sections: { title: string; messages: (string | null)[] }[] = [
         { title: "🌍 Không khí", messages: [airQualityMessage(aqi)] },
         { title: "☀️ Nắng & UV", messages: [uvMessage(uv)] },
-        { title: "🌧️ Mưa", messages: [rainMessage(rain, precip)] },
+        { title: "🌧️ Mưa", messages: [rainMessage(rain, precip, chance_of_rain, has_thunder)] },
         { title: "🌡️ Nhiệt độ", messages: [tempMessage(feelslike, windchill)] },
         { title: "💦 Độ ẩm", messages: [humidityMessage(humidity)] },
     ];

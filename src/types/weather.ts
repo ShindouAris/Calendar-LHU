@@ -86,6 +86,7 @@ export interface HourForecast {
   wind_dir: string;
   humidity: number;
   cloud: number;
+  precip_mm: number;
   feelslike_c: number;
   windchill_c: number;
   heatindex_c: number;
