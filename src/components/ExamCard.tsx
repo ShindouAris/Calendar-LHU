@@ -24,12 +24,6 @@ export const ExamCard: React.FC<ExamCardProps> = ({ exam }) => {
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {exam.TenKT}
             </h3>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-              <Badge className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">Kỳ thi</Badge>
-              {exam.CSS?.toLowerCase().includes('online') && (
-                <Badge variant="secondary">Online</Badge>
-              )}
-            </div>
           </div>
         </div>
 
