@@ -47,11 +47,20 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await authService.login({ DeviceInfo: deviceInfo, UserID: userId, Password: password });
-      const user = await authService.getUserInfo();
-      AuthStorage.setUser(user);
+      try {
+        const user = await authService.getUserInfo();
+        AuthStorage.setUser(user);
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message.includes("Phiên đã hết hạn")) {
+            throw new Error("Phiên đăng nhập không hợp lệ, vui lòng thử lại")
+          }
+        }
+      }
       toast.success('Đăng nhập thành công');
       navigate('/');
     } catch (err) {
+      (err instanceof Error && localStorage.removeItem("access_token"))
       toast.error(err instanceof Error ? err.message : 'Vui lòng thử lại');
     } finally {
       setLoading(false);

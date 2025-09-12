@@ -63,6 +63,7 @@ export const AuthStorage = {
   },
   deleteUser() {
     localStorage.removeItem(AUTH_STORAGE_KEY)
+    localStorage.removeItem("access_token")
   }
 };
 

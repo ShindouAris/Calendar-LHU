@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, GraduationCap, ArrowLeft } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { AuthStorage, type HocKyGroup, type MonHoc } from '@/types/user';
+import toast from 'react-hot-toast';
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -36,7 +37,12 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
         const data = await authService.getMark();
         setMarks(data ?? null);
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Không thể tải điểm');
+        if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
+          toast.error(e.message)
+          AuthStorage.deleteUser()
+        } else {
+          setError(e instanceof Error ? e.message : 'Không thể tải điểm');
+        }
       } finally {
         setLoading(false);
       }
