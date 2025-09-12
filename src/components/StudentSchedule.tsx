@@ -13,7 +13,7 @@ import { Layout } from './Layout';
 
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
-import { ApiResponse } from '@/types/schedule';
+import { ApiResponse, ExamInfo } from '@/types/schedule';
 import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,8 @@ import WeatherPage from '@/components/WeatherPage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthStorage } from '@/types/user';
 import { MarkPage } from './StudentMark';
+import { examCacheService } from '@/services/examCacheService';
+import { ExamCard } from './ExamCard';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +40,11 @@ export const StudentSchedule: React.FC = () => {
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
   const [avatar, setAvatar] = useState("")
   const user = AuthStorage.getUser()
+
+  // Exam state
+  const [exams, setExams] = useState<ExamInfo[] | null>(null);
+  const [loadingExam, setLoadingExam] = useState(false);
+  const [examError, setExamError] = useState<string | null>(null);
 
   useEffect(() => {
     cacheService.init();
@@ -140,9 +147,55 @@ export const StudentSchedule: React.FC = () => {
     }
   }, []);
 
+  const fetchPrivateExam = useCallback(async (studentId: string) => {
+    setLoadingExam(true);
+    setExamError(null);
+    try {
+      // Try cache first
+      const cached = await examCacheService.get(studentId);
+      if (cached) {
+        setExams(cached);
+        setLoadingExam(false);
+        return;
+      }
+
+      const numericId = Number(studentId);
+      if (!Number.isFinite(numericId)) {
+        setExams(null);
+        setLoadingExam(false);
+        return;
+      }
+
+      const res = await ApiService.getPrivateExam(numericId);
+      if (res && res.length > 0) {
+        const list = Array.isArray(res) ? res : [res as unknown as ExamInfo];
+        await examCacheService.set(studentId, list);
+        setExams(list);
+      } else {
+        // no exams
+        setExams([]);
+      }
+    } catch (e) {
+      try {
+        const stale = await examCacheService.getStale(studentId);
+        if (stale) {
+          setExams(stale);
+          toast.error('Không thể tải lịch thi. Đang dùng dữ liệu thi đã lưu.');
+        } else {
+          setExamError('Không thể tải lịch thi');
+        }
+      } catch {
+        setExamError('Không thể tải lịch thi');
+      }
+    } finally {
+      setLoadingExam(false);
+    }
+  }, []);
+
   const handleRetry = () => {
     if (currentStudentId) {
       fetchSchedule(currentStudentId, false);
+      fetchPrivateExam(currentStudentId);
     }
   };
 
@@ -158,6 +211,7 @@ export const StudentSchedule: React.FC = () => {
   const handleRefresh = () => {
     if (currentStudentId) {
       fetchSchedule(currentStudentId, false);
+      fetchPrivateExam(currentStudentId);
     }
   };
 
@@ -259,7 +313,7 @@ export const StudentSchedule: React.FC = () => {
               </div>
             ) : (
               <div className="max-w-2xl mx-auto">
-                <StudentIdInput onSubmit={fetchSchedule} loading={loading} />
+                <StudentIdInput onSubmit={async (id) => { await fetchSchedule(id); await fetchPrivateExam(id); }} loading={loading} />
               </div>
             )}
           </div>
@@ -489,6 +543,8 @@ export const StudentSchedule: React.FC = () => {
           <Timetable 
             schedules={schedules} 
             studentName={studentInfo?.HoTen}
+            exams={exams || []}
+            examDurationMinutes={120}
           />
         ) : page === "weather" ? (
           <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
@@ -498,6 +554,28 @@ export const StudentSchedule: React.FC = () => {
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (
           <>
+            {/* Exam section */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Lịch thi riêng</h3>
+                <Button variant="outline" size="sm" onClick={() => currentStudentId && fetchPrivateExam(currentStudentId)} disabled={loadingExam}>
+                  Tải lại
+                </Button>
+              </div>
+              {loadingExam ? (
+                <div className="flex justify-center mb-4"><LoadingSpinner /></div>
+              ) : examError ? (
+                <ErrorMessage message={examError} onRetry={() => currentStudentId && fetchPrivateExam(currentStudentId)} />
+              ) : exams && exams.length > 0 ? (
+                <div className="space-y-3 sm:space-y-4">
+                  {exams.map((ex, idx) => (
+                    <ExamCard key={idx} exam={ex} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-600 dark:text-gray-300">Không có lịch thi riêng.</p>
+              )}
+            </div>
             {/* Toggle View Button */}
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4 flex-wrap sm:flex-nowrap min-w-0">
               <div>
