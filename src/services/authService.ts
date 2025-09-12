@@ -111,13 +111,15 @@ export const authService = {
         throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
       }
       const data: HocKyGroup = await response.json()
-      if (!data.semesters) {
+      if (!data.semesters || Object.keys(data.semesters).length === 0) {
         throw new Error("Phiên đăng nhập không hợp lệ!")
       }
       return data
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(error.message)
+      } else {
+        throw error;
       }
     }
   }
