@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, MapPin, IdCard } from 'lucide-react';
 import type { ExamInfo } from '@/types/schedule';
 
