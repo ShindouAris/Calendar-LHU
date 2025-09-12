@@ -47,6 +47,9 @@ export const authService = {
       })
     });
     if (!response.ok) {
+      if (response.status === 401 ) {
+        throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
+      }
       let msg = `Không lấy được thông tin người dùng (${response.status})`;
       try {
         const ct = response.headers.get('content-type') || '';
@@ -57,7 +60,9 @@ export const authService = {
           const text = await response.text();
           if (text) msg = text;
         }
-      } catch {}
+      } catch {
+
+      }
       throw new Error(msg);
     }
     return (await response.json()) as UserResponse;
@@ -106,6 +111,9 @@ export const authService = {
         throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
       }
       const data: HocKyGroup = await response.json()
+      if (!data.semesters) {
+        throw new Error("Phiên đăng nhập không hợp lệ!")
+      }
       return data
     } catch (error) {
       if (error instanceof Error) {

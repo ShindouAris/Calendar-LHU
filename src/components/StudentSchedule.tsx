@@ -26,6 +26,7 @@ import { AuthStorage } from '@/types/user';
 import { MarkPage } from './StudentMark';
 import { examCacheService } from '@/services/examCacheService';
 import { ExamCard } from './ExamCard';
+import { authService } from '@/services/authService';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,25 @@ export const StudentSchedule: React.FC = () => {
       }
     };
     fetchCurrentWeather();
+  }, []);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const access_token = localStorage.getItem("access_token");
+      if (!access_token) return;
+  
+      try {
+        const userinfo = await authService.getUserInfo();
+        AuthStorage.setUser(userinfo);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("Phiên đã hết hạn")) {
+          AuthStorage.deleteUser();
+          toast.error("Phiên đã hết hạn, vui lòng đăng nhập lại");
+        }
+      }
+    };
+  
+    initAuth();
   }, []);
 
   const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
