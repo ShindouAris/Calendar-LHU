@@ -49,3 +49,20 @@ export interface CachedData {
   timestamp: number;
   expiry: number;
 }
+
+export interface ExamInfo {
+  StudentID: string; 
+  SoBaoDanh: string;
+  HoTen: string;
+  NgaySinh: string; 
+  NoiSinh: string
+  TenKT: string;   
+  NgayThi: string
+  GioThi: string
+  CSS: string;         
+  PhongThi: string;    
+}
+
+export interface ExamResponse {
+  data: [ExamInfo]
+}

@@ -1,4 +1,4 @@
-import { ApiRequest, ApiResponse } from '@/types/schedule';
+import { ApiRequest, ApiResponse, ExamInfo, ExamResponse } from '@/types/schedule';
 import { HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
 
 const API_ENDPOINT = import.meta.env.VITE_API_URL 
@@ -41,6 +41,32 @@ export class ApiService {
 
     return await response.json();
   };
+  static async getPrivateExam(ID: number): Promise<[ExamInfo] | null> {
+    try {
+      const res = await fetch(`${API_ENDPOINT}/private-exam`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ID: ID
+        })
+      })
+      if (!res.ok) {
+        return null
+      }
+      const data: ExamResponse = await res.json()
+
+      if (data.data.length < 1) {
+        return null
+      } 
+
+      return data.data
+      
+    } catch (error) {
+      return null
+    }
+  }
   static async get_current_weather(): Promise<WeatherCurrentAPIResponse> {
     const response = await fetch(`${API_ENDPOINT}/weather/current`, {
       method: 'GET',

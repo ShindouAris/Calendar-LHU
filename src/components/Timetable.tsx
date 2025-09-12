@@ -4,7 +4,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScheduleItem } from '@/types/schedule';
+import { ScheduleItem, ExamInfo } from '@/types/schedule';
 import { getRealtimeStatus } from '@/utils/dateUtils';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -25,6 +25,8 @@ const localizer = dateFnsLocalizer({
 interface TimetableProps {
   schedules: ScheduleItem[];
   studentName?: string;
+  exams?: ExamInfo[];
+  examDurationMinutes?: number;
 }
 
 interface CalendarEvent {
@@ -32,7 +34,7 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  resource: ScheduleItem;
+  resource: ScheduleItem | (ExamInfo & { __isExam: true });
 }
 
 const getStatusColor = (status: number, is_cancelled: boolean) => {
@@ -60,7 +62,7 @@ const getStatusText = (status: number, is_cancelled: boolean) => {
   }
 };
 
-export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) => {
+export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, exams = [], examDurationMinutes = 120 }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   React.useEffect(() => {
@@ -73,10 +75,9 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
   }, []);
 
   const events: CalendarEvent[] = useMemo(() => {
-    return schedules.map(schedule => {
+    const subjectEvents: CalendarEvent[] = schedules.map(schedule => {
       const startDate = new Date(schedule.ThoiGianBD);
       const endDate = new Date(schedule.ThoiGianKT);
-      
       return {
         id: schedule.ID,
         title: `${schedule.TenMonHoc} - ${schedule.TenNhom}`,
@@ -85,18 +86,54 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
         resource: schedule,
       };
     });
-  }, [schedules]);
+
+    const parseExamStart = (e: ExamInfo): Date | null => {
+      try {
+        // NgayThi có thể là dd/MM/yyyy hoặc yyyy-MM-dd. GioThi là HH:mm
+        const d = e.NgayThi || '';
+        const t = (e.GioThi || '').trim();
+        if (!d) return null;
+        let iso = '';
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+          const [dd, mm, yyyy] = d.split('/');
+          iso = `${yyyy}-${mm}-${dd}`;
+        } else {
+          iso = d;
+        }
+        const startStr = t ? `${iso}T${t}:00` : `${iso}T08:00:00`;
+        const date = new Date(startStr);
+        return isNaN(date.getTime()) ? null : date;
+      } catch {
+        return null;
+      }
+    };
+
+    const examEvents: CalendarEvent[] = (exams || []).map((exam, idx) => {
+      const startDate = parseExamStart(exam) || new Date();
+      const endDate = new Date(startDate.getTime() + examDurationMinutes * 60 * 1000);
+      return {
+        id: 1000000 + idx, // tránh trùng với ID lịch học
+        title: `${exam.TenKT}`,
+        start: startDate,
+        end: endDate,
+        resource: Object.assign({}, exam, { __isExam: true as const }),
+      };
+    });
+
+    return [...subjectEvents, ...examEvents];
+  }, [schedules, exams, examDurationMinutes]);
 
   const eventStyleGetter = (event: CalendarEvent) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
-    const is_cancelled = event.resource.TinhTrang !== 0;
-    const color = getStatusColor(status, is_cancelled);
+    const isExam = (event.resource as any).__isExam === true;
+    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
+    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled);
     
     return {
       style: {
         backgroundColor: color === 'bg-green-500' ? '#10b981' : 
                        color === 'bg-yellow-500' ? '#f59e0b' : 
-                       color === 'bg-gray-400' ? '#9ca3af' : color==="bg-red-500" ? '#E62727' : '#3b82f6',
+                       color === 'bg-gray-400' ? '#9ca3af' : color==="bg-red-500" ? '#E62727' : color==="bg-indigo-600" ? '#4f46e5' : '#3b82f6',
         borderRadius: isMobile ? '4px' : '6px',
         opacity: 0.9,
         color: 'white',
@@ -114,36 +151,49 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName }) 
       event.start.toISOString(),
       event.end.toISOString()
     );
-    const is_cancelled = event.resource.TinhTrang !== 0;
-    const statusText = getStatusText(status, is_cancelled);
+    const isExam = (event.resource as any).__isExam === true;
+    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
+    const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled);
   
     return (
       <div className={`${isMobile ? 'p-0.5 text-xs' : 'p-1 text-sm'}`}>
         <div className={`font-semibold mb-1 line-clamp-2 text-white ${isMobile ? 'text-xs leading-tight' : ''}`}>
-          {isMobile ? 
-            // Hiển thị rút gọn cho mobile
-            `${event.resource.TenMonHoc.substring(0, 20)}${event.resource.TenMonHoc.length > 20 ? '...' : ''}` :
-            event.title
-          }
+          {(() => {
+            if (isExam) {
+              const name = (event.resource as any).TenKT as string;
+              return isMobile ? `${name.substring(0, 20)}${name.length > 20 ? '...' : ''}` : name;
+            } else {
+              const subj = (event.resource as ScheduleItem).TenMonHoc;
+              const group = (event.resource as ScheduleItem).TenNhom;
+              const title = `${subj} - ${group}`;
+              return isMobile ? `${subj.substring(0, 20)}${subj.length > 20 ? '...' : ''}` : title;
+            }
+          })()}
         </div>
         <div className="opacity-90 text-white space-y-0.5">
           {!isMobile && (
             <div className="line-clamp-1">
-              {event.resource.TenPhong ||
-                event.resource.OnlineLink ||
-                "Không có địa điểm"}
+              {(() => {
+                if (isExam) {
+                  const r = event.resource as any;
+                  return r.PhongThi || r.CSS || 'Không có địa điểm';
+                }
+                const r = event.resource as ScheduleItem;
+                return r.TenPhong || r.OnlineLink || 'Không có địa điểm';
+              })()}
             </div>
           )}
           <div className={`line-clamp-1 ${isMobile ? 'text-xs' : ''}`}>
-            {isMobile ? 
-              event.resource.GiaoVien.substring(0, 15) + (event.resource.GiaoVien.length > 15 ? '...' : '') :
-              event.resource.GiaoVien
-            }
+            {(() => {
+              if (isExam) return '';
+              const teacher = (event.resource as ScheduleItem).GiaoVien;
+              return isMobile ? teacher.substring(0, 15) + (teacher.length > 15 ? '...' : '') : teacher;
+            })()}
           </div>
           <div className="mt-1">
             <Badge
               variant="secondary"
-              className={`${isMobile ? 'text-xs px-1 py-0' : 'text-xs px-1.5 py-0.5'} ${getStatusColor(
+              className={`${isMobile ? 'text-xs px-1 py-0' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
                 status,
                 is_cancelled
               )} text-white border-0`}
