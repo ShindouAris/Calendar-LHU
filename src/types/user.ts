@@ -33,7 +33,7 @@ export interface HocKyGroup {
   semesters: {
       [hocKy: string]: MonHoc[];
   };
-  sync_token: string | null;
+  tin_chi_tich_luy: number
 }
 
 export const AUTH_STORAGE_KEY = 'auth_user';

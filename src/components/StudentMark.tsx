@@ -5,6 +5,7 @@ import { BookOpen, GraduationCap, ArrowLeft } from 'lucide-react';
 import { authService } from '@/services/authService';
 import { AuthStorage, type HocKyGroup, type MonHoc } from '@/types/user';
 import toast from 'react-hot-toast';
+import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -15,6 +16,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [error, setError] = useState<string | null>(null);
   const [marks, setMarks] = useState<HocKyGroup | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
+  const [tinchi, setTinchi] = useState<number>(0)
   const user = AuthStorage.getUser();
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
@@ -62,6 +64,21 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
       setSelectedSemester(null);
     }
   }, [marks]);
+
+  useEffect(() => {
+    if (!marks || !marks.semesters) {
+      setTinchi(0)
+    }
+      const hocki = marks?.semesters[selectedSemester || 1]
+
+      if (hocki) {
+        let tin_chi = 0
+        hocki.forEach((monhoc, _) => {
+          tin_chi += Number(monhoc.he_so)
+        })
+        setTinchi(tin_chi)
+      }
+    }, [selectedSemester])
 
   return (
     <div className="space-y-6">
@@ -118,6 +135,8 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-blue-600" /> Học kỳ {hocKy}
+                    <PiChalkboardSimpleDuotone className="h-5 w-5 text-green-600" /> Số tín chỉ trong kì {tinchi}
+                    <PiDiceThreeDuotone className="h-5 w-5 text-yellow-600" /> Số tín chỉ tích luỹ {marks.tin_chi_tich_luy}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -127,7 +146,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                         <tr className="bg-gray-100 dark:bg-gray-700 text-center">
                           <th className="px-4 py-2">Mã MH</th>
                           <th className="px-4 py-2">Tên môn học</th>
-                          <th className="px-4 py-2">Hệ số</th>
+                          <th className="px-4 py-2">Tín chỉ</th>
                           <th className="px-4 py-2">Điểm TP</th>
                           <th className="px-4 py-2">Điểm TB</th>
                         </tr>
