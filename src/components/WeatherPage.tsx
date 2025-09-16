@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, CloudRain, Thermometer, Wind, Droplets, ArrowLeft, Sun, Leaf } from 'lucide-react';
+import { FaHouseFloodWater } from "react-icons/fa6";
 import { ApiService } from '@/services/apiService';
 import type { HourForecast, WeatherForeCastAPIResponse, WeatherCurrentAPIResponse } from '@/types/weather';
 import { computeAQIFromPM } from '@/services/aqiService';
@@ -15,7 +16,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [forecastDays, setForecastDays] = useState<WeatherForeCastAPIResponse | null>(null);
-  const [autoforecastResp, setAutoforecastResp] = useState<HourForecast | null>(null)
+  const [autoforecastResp, setAutoforecastResp] = useState<HourForecast | null>(null);
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
   useEffect(() => {
@@ -96,7 +97,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
             <div className="w-full rounded-xl border border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
                 ⚠️ Lưu ý thời tiết
                 <hr className="my-2 border-yellow-300 dark:border-yellow-700" />
-                {get_warning(autoforecastResp ? autoforecastResp : currentWeather)}
+                {get_warning(autoforecastResp, currentWeather)}
             </div>
         </CardFooter>
 
@@ -140,7 +141,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                     <div className="flex items-center gap-2"><Wind className="h-4 w-4" />Gió: {Math.round(d.day.maxwind_kph)} km/h</div>
                     <div className="flex items-center gap-2"><Droplets className="h-4 w-4" />Ẩm: {Math.round(d.day.avghumidity)}%</div>
                     <div className="flex items-center gap-2"><CloudRain className="h-4 w-4" />Mưa: {d.day.daily_chance_of_rain}%</div>
-                    <div className="flex items-center gap-2"><Leaf className="h-4 w-4" />AQI: {computeAQIFromPM(d.day.air_quality.pm2_5, d.day.air_quality.pm10).aqi}</div>
+                    <div className="flex items-center gap-2"><FaHouseFloodWater className="h-4 w-4" />Tổng {Math.round(d.day.totalprecip_mm)} mm</div>
                   </div>
 
                   {/* Mini hours strip */}

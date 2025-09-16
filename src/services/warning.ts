@@ -86,29 +86,32 @@ const humidityMessage = (humidity: number): string | null => {
     return null;
 };
 
-export const get_warning = (weather_data: WeatherCurrentAPIResponse | HourForecast): string => {
+export const get_warning = (weather_data: HourForecast | null, current_forecast: WeatherCurrentAPIResponse): string => {
 
-    let weather
+    let aqi
 
-    if ("current" in weather_data) {
-        weather = weather_data.current  
-    } else {
-        weather = weather_data
+    if (weather_data === null) {
+      return ""
     }
 
-    const aqi = computeAQIFromPM(weather.air_quality.pm2_5, weather.air_quality.pm10).aqi
-    const uv = weather.uv
-    const text = weather.condition.text.toLowerCase();
+    if ("air_quality" in weather_data) {
+      aqi = computeAQIFromPM(weather_data.air_quality.pm2_5, weather_data.air_quality.pm10).aqi
+    } else {
+      aqi = computeAQIFromPM(current_forecast.current.air_quality.pm2_5, current_forecast.current.air_quality.pm10).aqi
+    }
+
+    const uv = weather_data.uv
+    const text = weather_data.condition.text.toLowerCase();
     const has_thunder = ["sét", "giông"].some(keyword => text.includes(keyword));
     const rain = text.includes("mưa")
-    const humidity = weather.humidity
-    const windchill = weather.windchill_c
-    const feelslike = weather.feelslike_c
+    const humidity = weather_data.humidity
+    const windchill = weather_data.windchill_c
+    const feelslike = weather_data.feelslike_c
     let chance_of_rain = null;
-    if ("chance_of_rain" in weather) {
-        chance_of_rain = weather.chance_of_rain
+    if ("chance_of_rain" in weather_data) {
+        chance_of_rain = weather_data.chance_of_rain
     }
-    const precip = weather.precip_mm;
+    const precip = weather_data.precip_mm;
 
 
     const sections: { title: string; messages: (string | null)[] }[] = [
