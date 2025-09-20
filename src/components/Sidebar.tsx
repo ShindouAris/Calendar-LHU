@@ -41,7 +41,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   showBack = false,
   showRefresh = false,
   title = "LHU Dashboard",
-  showThemeToggle = false,
   page = "home",
   onPageChange,
   onThemeToggle,
@@ -126,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       action: onRefresh,
       description: 'Tải lại dữ liệu'
     }] : []),
-    ...(showThemeToggle && onThemeToggle ? [{
+    ...(onThemeToggle ? [{
       id: 'theme',
       label: isDark ? 'Sáng' : 'Tối',
       icon: isDark ? Sun : Moon,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -15,8 +15,6 @@ interface LayoutProps {
   page: string;
   onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark") => void;
   title?: string;
-  showThemeToggle?: boolean;
-  onThemeToggle?: () => void;
   isDark?: boolean;
 }
 
@@ -29,11 +27,9 @@ export const Layout: React.FC<LayoutProps> = ({
   page,
   onPageChange,
   title,
-  showThemeToggle = false,
-  onThemeToggle,
-  isDark = false
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const loggedInUser = AuthStorage.isLoggedIn()
 
   const toggleSidebar = () => {
@@ -54,6 +50,26 @@ export const Layout: React.FC<LayoutProps> = ({
     
   }
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Background decoration */}
@@ -73,9 +89,8 @@ export const Layout: React.FC<LayoutProps> = ({
           page={page}
           onPageChange={onPageChange}
           title={title}
-          showThemeToggle={showThemeToggle}
-          onThemeToggle={onThemeToggle}
-          isDark={isDark}
+          onThemeToggle={toggleTheme}
+          isDark={isDarkMode}
           isOpen={sidebarOpen}
           isAuth={loggedInUser}
           onLogout={handleLogout}
