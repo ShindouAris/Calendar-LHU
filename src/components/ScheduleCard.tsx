@@ -60,6 +60,19 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     }
   };
 
+  const classStatus = (status: number) => {
+    switch (status) {
+      case 0: 
+        return "";
+      case 1: 
+        return "Đổi lịch";
+      case 2:
+        return "Báo Nghỉ";
+      default: 
+       return "";
+    }
+  } 
+
   function minutesToHourMinute(minutes: number): string {
     const h = Math.floor(minutes / 60); // chia lấy giờ
     const m = minutes % 60; // còn dư là phút
@@ -184,8 +197,8 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
   return (
     <Card className={`group transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
       isNext 
-        ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/50 dark:via-indigo-950/50 dark:to-purple-950/50 shadow-blue-200 dark:shadow-blue-900/50' 
-        : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800'
+        ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-600 dark:via-indigo-500 dark:to-purple-600 shadow-blue-200 dark:shadow-blue-700' 
+        : 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-400 dark:via-red-400 dark:to-pink-400'
     }`}>
       {/* Next Class Banner */}
       {isNext && (
@@ -212,9 +225,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               <span className="hidden sm:inline text-gray-400">•</span>
               <span className="font-medium">{formatDate(schedule.ThoiGianBD)}</span>
               {/* Badges: TinhTrang, CalenType, Type */}
-              {schedule.TinhTrang !== 0 && (
+              {classStatus(schedule.TinhTrang) !== "" && (
                 <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
-                  Báo nghỉ
+                  {classStatus(schedule.TinhTrang)}
                 </Badge>
               )}
               {schedule.CalenType === 2 && (

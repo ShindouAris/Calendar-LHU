@@ -498,7 +498,7 @@ export const StudentSchedule: React.FC = () => {
               <div className="text-center md:text-right">
                 <div className="flex items-center justify-center md:justify-end gap-2 text-sm text-gray-600 dark:text-gray-300 mb-1">
                   <CalendarDays className="h-4 w-4" />
-                  <span>Tuần học hiện tại</span>
+                  <span>Kì học hiện tại</span>
                 </div>
                 <p className="font-semibold text-gray-900 dark:text-white">
                   {weekInfo?.TuanBD && formatDate(weekInfo.TuanBD)} - {weekInfo?.TuanKT && formatDate(weekInfo.TuanKT)}
@@ -514,7 +514,7 @@ export const StudentSchedule: React.FC = () => {
                 value={schedules.length}
                 icon={BookOpen}
                 color="blue"
-                description="Tiết học trong tuần học"
+                description="Tiết học trong kì"
               />
               
               {nextClass && (

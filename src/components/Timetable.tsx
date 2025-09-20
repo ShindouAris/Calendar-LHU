@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback, memo } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -62,17 +62,29 @@ const getStatusText = (status: number, is_cancelled: boolean) => {
   }
 };
 
-export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, exams = [], examDurationMinutes = 120 }) => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentName, exams = [], examDurationMinutes = 120 }) => {
+  const [screenSize, setScreenSize] = useState(() => {
+    const width = window.innerWidth;
+    if (width < 640) return 'mobile';
+    if (width < 1024) return 'tablet';
+    return 'desktop';
+  });
 
   React.useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const width = window.innerWidth;
+      if (width < 640) setScreenSize('mobile');
+      else if (width < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const isMobile = screenSize === 'mobile';
+  const isTablet = screenSize === 'tablet';
+  const isDesktop = screenSize === 'desktop';
 
   const events: CalendarEvent[] = useMemo(() => {
     const subjectEvents: CalendarEvent[] = schedules.map(schedule => {
@@ -123,30 +135,59 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
     return [...subjectEvents, ...examEvents];
   }, [schedules, exams, examDurationMinutes]);
 
-  const eventStyleGetter = (event: CalendarEvent) => {
+  const eventStyleGetter = useCallback((event: CalendarEvent) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
     const isExam = (event.resource as any).__isExam === true;
     const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
     const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled);
     
+    const getColorValue = (colorClass: string) => {
+      switch (colorClass) {
+        case 'bg-green-500': return '#10b981';
+        case 'bg-yellow-500': return '#f59e0b';
+        case 'bg-gray-400': return '#9ca3af';
+        case 'bg-red-500': return '#E62727';
+        case 'bg-indigo-600': return '#4f46e5';
+        default: return '#3b82f6';
+      }
+    };
+    
+    const getFontSize = () => {
+      if (isMobile) return '10px';
+      if (isTablet) return '11px';
+      return '12px';
+    };
+    
+    const getPadding = () => {
+      if (isMobile) return '2px';
+      if (isTablet) return '3px';
+      return '4px';
+    };
+    
+    const getBorderRadius = () => {
+      if (isMobile) return '4px';
+      if (isTablet) return '5px';
+      return '6px';
+    };
+    
     return {
       style: {
-        backgroundColor: color === 'bg-green-500' ? '#10b981' : 
-                       color === 'bg-yellow-500' ? '#f59e0b' : 
-                       color === 'bg-gray-400' ? '#9ca3af' : color==="bg-red-500" ? '#E62727' : color==="bg-indigo-600" ? '#4f46e5' : '#3b82f6',
-        borderRadius: isMobile ? '4px' : '6px',
+        backgroundColor: getColorValue(color),
+        borderRadius: getBorderRadius(),
         opacity: 0.9,
         color: 'white',
         border: '0px',
         display: 'block',
-        fontSize: isMobile ? '10px' : '12px',
+        fontSize: getFontSize(),
         fontWeight: '500',
-        padding: isMobile ? '2px' : '4px',
+        padding: getPadding(),
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.2s ease-in-out',
       }
     };
-  };
+  }, [isMobile, isTablet, isDesktop]);
 
-  const EventComponent = ({ event }: { event: CalendarEvent }) => {
+  const EventComponent = memo(({ event }: { event: CalendarEvent }) => {
     const status = getRealtimeStatus(
       event.start.toISOString(),
       event.end.toISOString()
@@ -155,24 +196,47 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
     const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
     const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled);
   
+    const getPaddingClass = () => {
+      if (isMobile) return 'p-0.5 text-xs';
+      if (isTablet) return 'p-0.75 text-xs';
+      return 'p-1 text-sm';
+    };
+    
+    const getTitleClass = () => {
+      if (isMobile) return 'text-xs leading-tight';
+      if (isTablet) return 'text-xs leading-snug';
+      return 'text-sm leading-normal';
+    };
+    
+    const truncateText = (text: string, maxLength: number) => {
+      if (text.length <= maxLength) return text;
+      return `${text.substring(0, maxLength)}...`;
+    };
+    
+    const getMaxLength = () => {
+      if (isMobile) return 15;
+      if (isTablet) return 25;
+      return 50;
+    };
+  
     return (
-      <div className={`${isMobile ? 'p-0.5 text-xs' : 'p-1 text-sm'}`}>
-        <div className={`font-semibold mb-1 line-clamp-2 text-white ${isMobile ? 'text-xs leading-tight' : ''}`}>
+      <div className={`${getPaddingClass()} hover:scale-105 transition-transform duration-200`}>
+        <div className={`font-semibold mb-1 line-clamp-2 text-white ${getTitleClass()}`}>
           {(() => {
             if (isExam) {
               const name = (event.resource as any).TenKT as string;
-              return isMobile ? `${name.substring(0, 20)}${name.length > 20 ? '...' : ''}` : name;
+              return truncateText(name, getMaxLength());
             } else {
               const subj = (event.resource as ScheduleItem).TenMonHoc;
               const group = (event.resource as ScheduleItem).TenNhom;
               const title = `${subj} - ${group}`;
-              return isMobile ? `${subj.substring(0, 20)}${subj.length > 20 ? '...' : ''}` : title;
+              return truncateText(title, getMaxLength());
             }
           })()}
         </div>
         <div className="opacity-90 text-white space-y-0.5">
           {!isMobile && (
-            <div className="line-clamp-1">
+            <div className="line-clamp-1 text-xs">
               {(() => {
                 if (isExam) {
                   const r = event.resource as any;
@@ -183,20 +247,20 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
               })()}
             </div>
           )}
-          <div className={`line-clamp-1 ${isMobile ? 'text-xs' : ''}`}>
+          <div className={`line-clamp-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>
             {(() => {
               if (isExam) return '';
               const teacher = (event.resource as ScheduleItem).GiaoVien;
-              return isMobile ? teacher.substring(0, 15) + (teacher.length > 15 ? '...' : '') : teacher;
+              return truncateText(teacher, getMaxLength());
             })()}
           </div>
           <div className="mt-1">
             <Badge
               variant="secondary"
-              className={`${isMobile ? 'text-xs px-1 py-0' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
+              className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
                 status,
                 is_cancelled
-              )} text-white border-0`}
+              )} text-white border-0 shadow-sm`}
             >
               {statusText}
             </Badge>
@@ -204,9 +268,9 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
         </div>
       </div>
     );
-  };
+  });
 
-  const ToolbarComponent = (toolbar: any) => {
+  const ToolbarComponent = memo((toolbar: any) => {
     const goToToday = () => {
       toolbar.onNavigate('TODAY');
     };
@@ -220,9 +284,33 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
     };
 
     const viewNames = {
-      month: isMobile ? 'M' : 'Tháng',
-      week: isMobile ? 'W' : 'Tuần',
-      day: isMobile ? 'D' : 'Ngày'
+      month: isMobile ? 'M' : isTablet ? 'Tháng' : 'Tháng',
+      week: isMobile ? 'W' : isTablet ? 'Tuần' : 'Tuần',
+      day: isMobile ? 'D' : isTablet ? 'Ngày' : 'Ngày'
+    };
+
+    const getButtonSize = () => {
+      if (isMobile) return 'px-2 py-1 text-xs';
+      if (isTablet) return 'px-2.5 py-1.5 text-sm';
+      return 'px-3 py-2 text-sm';
+    };
+    
+    const getNavButtonSize = () => {
+      if (isMobile) return 'p-1';
+      if (isTablet) return 'p-1.5';
+      return 'p-2';
+    };
+    
+    const getTitleSize = () => {
+      if (isMobile) return 'text-sm';
+      if (isTablet) return 'text-base';
+      return 'text-base sm:text-lg';
+    };
+    
+    const getViewButtonSize = () => {
+      if (isMobile) return 'px-2 py-1 text-xs';
+      if (isTablet) return 'px-2.5 py-1 text-sm';
+      return 'px-2 sm:px-3 py-1 text-xs sm:text-sm';
     };
 
     return (
@@ -232,41 +320,45 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={goToToday}
-              className={`${isMobile ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium`}
+              className={`${getButtonSize()} bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md`}
+              aria-label="Đi đến hôm nay"
             >
-              {isMobile ? 'Hôm nay' : 'Hôm nay'}
+              Hôm nay
             </button>
             <button
               onClick={goToPrev}
-              className={`${isMobile ? 'p-1' : 'p-2'} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors`}
+              className={`${getNavButtonSize()} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              aria-label="Tuần trước"
             >
               ←
             </button>
             <button
               onClick={goToNext}
-              className={`${isMobile ? 'p-1' : 'p-2'} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors`}
+              className={`${getNavButtonSize()} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              aria-label="Tuần sau"
             >
               →
             </button>
           </div>
           
-          <div className={`${isMobile ? 'text-sm' : 'text-base sm:text-lg'} font-semibold text-gray-900 dark:text-white text-center`}>
+          <div className={`${getTitleSize()} font-semibold text-gray-900 dark:text-white text-center`}>
             {toolbar.label}
           </div>
         </div>
         
         {/* View Controls */}
         <div className="flex items-center justify-center">
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-md p-1">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-md p-1 shadow-sm">
             {Object.entries(viewNames).map(([key, name]) => (
               <button
                 key={key}
                 onClick={() => toolbar.onView(key)}
-                className={`${isMobile ? 'px-2 py-1 text-xs' : 'px-2 sm:px-3 py-1 text-xs sm:text-sm'} rounded font-medium transition-colors ${
+                className={`${getViewButtonSize()} rounded font-medium transition-colors ${
                   toolbar.view === key
                     ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
+                aria-label={`Chuyển sang chế độ ${name}`}
               >
                 {name}
               </button>
@@ -275,7 +367,7 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
         </div>
       </div>
     );
-  };
+  });
 
   if (schedules.length === 0) {
     return (
@@ -328,14 +420,22 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
       </Card>
 
       {/* Calendar */}
-      <Card className="border-0 shadow-lg">
+      <Card className="border-0 shadow-lg" role="main" aria-label="Lịch học">
         <CardHeader className="pb-2 sm:pb-3">
           <CardTitle className="text-sm sm:text-base md:text-lg text-gray-900 dark:text-white">
             Lịch học {studentName ? `của ${studentName}` : ''}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-2 sm:p-3 md:p-6">
-          <div className={`${isMobile ? 'h-[calc(100vh-150px)]' : 'h-[calc(100vh-100px)]'}`}>
+        <CardContent className={`${isMobile ? 'p-2' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-6'}`}>
+          <div 
+            className={`${
+              isMobile ? 'h-[calc(100vh-150px)]' : 
+              isTablet ? 'h-[calc(100vh-120px)]' : 
+              'h-[calc(100vh-100px)]'
+            }`}
+            role="application"
+            aria-label="Lịch học tương tác"
+          >
             <Calendar
               localizer={localizer}
               events={events}
@@ -343,13 +443,21 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
               endAccessor="end"
               style={{ height: '100%' }}
               views={['month', 'week', 'day']}
-              defaultView={isMobile ? 'day' : 'week'}
+              defaultView={isMobile ? 'day' : isTablet ? 'week' : 'week'}
               step={60}
               timeslots={1}
               eventPropGetter={eventStyleGetter}
               components={{
                 event: EventComponent,
                 toolbar: ToolbarComponent,
+              }}
+              onSelectEvent={(event) => {
+                // Handle event selection for accessibility
+                console.log('Event selected:', event);
+              }}
+              onSelectSlot={(slotInfo) => {
+                // Handle slot selection for accessibility
+                console.log('Slot selected:', slotInfo);
               }}
               messages={{
                 next: "Tiếp",
@@ -368,21 +476,29 @@ export const Timetable: React.FC<TimetableProps> = ({ schedules, studentName, ex
               min={new Date(2023, 0, 1, 7, 0)} // 7:00 AM
               max={new Date(2023, 0, 1, 22, 0)} // 10:00 PM
               formats={{
-                timeGutterFormat: (date: Date, culture?: string, localizer?: any) => 
-                  localizer.format(date, isMobile ? 'H:mm' : 'HH:mm', culture),
-                dayFormat: (date: Date, culture?: string, localizer?: any) =>
-                  localizer.format(date, isMobile ? 'dd/MM' : 'dd/MM/yyyy', culture),
-                monthHeaderFormat: (date: Date, culture?: string, localizer?: any) =>
-                  localizer.format(date, isMobile ? 'MM/yyyy' : 'MMMM yyyy', culture),
-                dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }, culture?: string, localizer?: any) =>
-                  `${localizer.format(start, isMobile ? 'dd/MM' : 'dd/MM/yyyy', culture)} - ${localizer.format(end, isMobile ? 'dd/MM' : 'dd/MM/yyyy', culture)}`,
+                timeGutterFormat: (date: Date, culture?: string, localizer?: any) => {
+                  const format = isMobile ? 'H:mm' : isTablet ? 'HH:mm' : 'HH:mm';
+                  return localizer.format(date, format, culture);
+                },
+                dayFormat: (date: Date, culture?: string, localizer?: any) => {
+                  const format = isMobile ? 'dd/MM' : isTablet ? 'dd/MM' : 'dd/MM/yyyy';
+                  return localizer.format(date, format, culture);
+                },
+                monthHeaderFormat: (date: Date, culture?: string, localizer?: any) => {
+                  const format = isMobile ? 'MM/yyyy' : isTablet ? 'MM/yyyy' : 'MMMM yyyy';
+                  return localizer.format(date, format, culture);
+                },
+                dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }, culture?: string, localizer?: any) => {
+                  const format = isMobile ? 'dd/MM' : isTablet ? 'dd/MM' : 'dd/MM/yyyy';
+                  return `${localizer.format(start, format, culture)} - ${localizer.format(end, format, culture)}`;
+                },
               }}
               popup={!isMobile}
-              popupOffset={isMobile ? { x: 10, y: 10 } : { x: 30, y: 20 }}
+              popupOffset={isMobile ? { x: 10, y: 10 } : isTablet ? { x: 20, y: 15 } : { x: 30, y: 20 }}
             />
           </div>
         </CardContent>
       </Card>
     </div>
   );
-};
+});
