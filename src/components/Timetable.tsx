@@ -37,9 +37,12 @@ interface CalendarEvent {
   resource: ScheduleItem | (ExamInfo & { __isExam: true });
 }
 
-const getStatusColor = (status: number, is_cancelled: boolean) => {
+const getStatusColor = (status: number, is_cancelled: boolean, is_changed_schedule: boolean) => {
   if (is_cancelled) {
     return 'bg-red-500'
+  }
+  if (is_changed_schedule) {
+    return 'bg-yellow-500';
   }
   switch (status) {
     case 1: return 'bg-green-500'; // Đang diễn ra
@@ -49,9 +52,12 @@ const getStatusColor = (status: number, is_cancelled: boolean) => {
   }
 };
 
-const getStatusText = (status: number, is_cancelled: boolean) => {
+const getStatusText = (status: number, is_cancelled: boolean, is_changed_schedule: boolean) => {
   if (is_cancelled) {
     return 'Báo Nghỉ'
+  }
+  if (is_changed_schedule) {
+    return 'Dời lịch';
   }
   switch (status) {
     case 1: return 'Đang diễn ra';
@@ -138,8 +144,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
   const eventStyleGetter = useCallback((event: CalendarEvent) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
     const isExam = (event.resource as any).__isExam === true;
-    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
-    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled);
+    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang === 2;
+    const is_changed_schedule = !isExam && (event.resource as ScheduleItem).TinhTrang === 1;
+    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled, is_changed_schedule);
     
     const getColorValue = (colorClass: string) => {
       switch (colorClass) {
@@ -193,9 +200,10 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       event.end.toISOString()
     );
     const isExam = (event.resource as any).__isExam === true;
-    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang !== 0;
-    const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled);
-  
+    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang === 2;
+    const is_changed_schedule = !isExam && (event.resource as ScheduleItem).TinhTrang === 1;
+    const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled, is_changed_schedule);
+    
     const getPaddingClass = () => {
       if (isMobile) return 'p-0.5 text-xs';
       if (isTablet) return 'p-0.75 text-xs';
@@ -259,7 +267,8 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               variant="secondary"
               className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
                 status,
-                is_cancelled
+                is_cancelled,
+                is_changed_schedule
               )} text-white border-0 shadow-sm`}
             >
               {statusText}

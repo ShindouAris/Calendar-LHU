@@ -66,7 +66,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
       case 0: 
         return "";
       case 1: 
-        return "Đổi lịch";
+        return "Dời lịch";
       case 2:
         return "Báo Nghỉ";
       default: 
