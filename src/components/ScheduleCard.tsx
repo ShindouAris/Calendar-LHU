@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Clock, 
   MapPin, 
@@ -214,9 +215,18 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
         {/* Header Section */}
         <div className="flex items-start justify-between mb-5 sm:mb-6 gap-3">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-violet-500 transition-all truncate">
-              {schedule.TenMonHoc}
-            </h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-400 to-indigo-300 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-violet-200 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
+                    {schedule.TenMonHoc}
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <p className="text-sm">{schedule.TenMonHoc}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
               <div className="flex items-center gap-2 bg-pink-200 dark:bg-blue-950/50 px-2.5 sm:px-3 py-1 rounded-full">
                 <Calendar className="h-4 w-4 text-blue-500" />
@@ -250,7 +260,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
         </div>
 
         {/* Schedule Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-5 sm:mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-5 sm:mb-6">
           {/* Left Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
@@ -259,7 +269,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời gian</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
                   {formatTime(schedule.ThoiGianBD)} - {formatTime(schedule.ThoiGianKT)}
                 </div>
               </div>
@@ -271,7 +281,18 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Phòng học</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{schedule.TenPhong}</div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                        {schedule.TenPhong}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-sm">{schedule.TenPhong}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
 
@@ -281,20 +302,65 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Giảng viên</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{schedule.GiaoVien}</div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                        {schedule.GiaoVien}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-sm">{schedule.GiaoVien}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
-            </div>            
+            </div>
+            {/* Lưu ý chuyển lên cuối cột trái */}
+            {infomation !== null && (
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-xl min-h-[60px] sm:min-h-[72px] border border-yellow-300 dark:border-yellow-700">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                  <MessageSquareWarning className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-semibold">Lưu ý</div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100 cursor-help line-clamp-2 hover:line-clamp-none transition-all">
+                          {infomation}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-sm">{infomation}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
               <div className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
-              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
-              <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
-              <div ref={groupNameRef} className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap ${shouldMarquee ? 'animate-marquee' : ''}`}>{nhomHoc ? nhomHoc : schedule.TenNhom}</div>
+                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div ref={groupNameRef} className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
+                        {nhomHoc ? nhomHoc : schedule.TenNhom}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-sm">{nhomHoc ? nhomHoc : schedule.TenNhom}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
 
@@ -304,7 +370,18 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cơ sở</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{getStudyPlace(schedule)}</div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                        {getStudyPlace(schedule)}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      <p className="text-sm">{getStudyPlace(schedule)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
 
@@ -314,7 +391,9 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời lượng tiết</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">{minutesToHourMinute(schedule.SoTietBuoi)}</div>
+                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                  {minutesToHourMinute(schedule.SoTietBuoi)}
+                </div>
               </div>
             </div>
             {forecastHour && (
@@ -334,33 +413,23 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến</div>
-                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
                     {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
                   </div>
                 </div>
               </div>
             )}
           </div>
-          {infomation !== null &&
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-xl min-h-[60px] sm:min-h-[72px] border border-yellow-300 dark:border-yellow-700">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                <MessageSquareWarning className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-semibold">Lưu ý</div>
-                <div className="text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100 truncate">{infomation}</div>
-              </div>
-            </div>} 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-2.5 sm:gap-3 pt-5 sm:pt-6 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 pt-5 sm:pt-6 border-t border-gray-100 dark:border-gray-700">
           {schedule.GoogleMap && schedule.GoogleMap !== null && (
             <Button
               size="lg"
               variant="outline"
               onClick={() => window.open(schedule.GoogleMap, '_blank')}
-              className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group w-full sm:w-auto"
+              className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group w-full"
             >
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                 <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -375,7 +444,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               size="lg"
               variant="outline"
               onClick={() => window.open(schedule.OnlineLink, '_blank')}
-              className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full sm:w-auto"
+              className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full"
             >
               <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Video className="h-4 w-4 text-green-600 dark:text-green-400" />
