@@ -3,7 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { AlertTriangle, ChevronDown, ChevronRight, Clock, Calendar, BookOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, Clock, Calendar, BookOpen } from 'lucide-react';
 import { DuplicateScheduleGroup, getDuplicateGroupStatus } from '@/utils/scheduleUtils';
 import { formatTime, formatDate } from '@/utils/dateUtils';
 
@@ -13,8 +13,7 @@ interface DuplicateScheduleWarningProps {
 }
 
 export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> = ({ 
-  duplicates, 
-  onViewDetails 
+  duplicates 
 }) => {
   const [expandedGroups, setExpandedGroups] = React.useState<Set<string>>(new Set());
 
