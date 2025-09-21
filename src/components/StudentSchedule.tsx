@@ -81,7 +81,7 @@ export const StudentSchedule: React.FC = () => {
     else {
       setPage("home");
     }
-  }, [location.pathname]);
+  }, [location.pathname || currentStudentId]);
 
   useEffect(() => {
     const fetchCurrentWeather = async () => {
