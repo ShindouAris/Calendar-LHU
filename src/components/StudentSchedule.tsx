@@ -650,6 +650,7 @@ export const StudentSchedule: React.FC = () => {
                     key={schedule.ID || index}
                     schedule={schedule}
                     isNext={nextClass?.ID === schedule.ID}
+                    allSchedules={schedules}
                   />
                 ))
               )}

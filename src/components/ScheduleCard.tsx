@@ -15,19 +15,25 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock3,
-  MessageSquareWarning
+  MessageSquareWarning,
+  AlertTriangle
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
 import { formatTime, formatDate, getDayName, getRealtimeStatus, StartAfter } from '@/utils/dateUtils';
 import { ApiService } from '@/services/apiService';
 import type { HourForecast } from '@/types/weather';
+import { 
+  detectDuplicateSchedules, 
+  getDuplicateGroupStatus 
+} from '@/utils/scheduleUtils';
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
   isNext?: boolean;
+  allSchedules?: ScheduleItem[]; // Thêm để phát hiện lịch trùng
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = false }) => {
+export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = false, allSchedules = [] }) => {
   const getStatusConfig = (status: number) => {
     switch (status) {
       case 1:
@@ -121,6 +127,36 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
   const [infomation, setInfomation]= useState<string | null>(null)
 
   const [nhomHoc, setNhomHoc] = useState<string | null>(null)
+
+  // Phát hiện lịch trùng
+  const [duplicateInfo, setDuplicateInfo] = useState<{
+    isDuplicate: boolean;
+    duplicateGroup?: string;
+    duplicateSchedules?: ScheduleItem[];
+    status?: ReturnType<typeof getDuplicateGroupStatus>;
+  }>({ isDuplicate: false });
+
+  useEffect(() => {
+    if (allSchedules.length > 0) {
+      const duplicates = detectDuplicateSchedules(allSchedules);
+      // Tìm group chứa lịch hiện tại
+      const duplicateGroup = duplicates.find(d => 
+        d.schedules.some(s => s.ID === schedule.ID)
+      );
+      
+      if (duplicateGroup) {
+        const status = getDuplicateGroupStatus(duplicateGroup.schedules);
+        setDuplicateInfo({
+          isDuplicate: true,
+          duplicateGroup: duplicateGroup.key,
+          duplicateSchedules: duplicateGroup.schedules,
+          status
+        });
+      } else {
+        setDuplicateInfo({ isDuplicate: false });
+      }
+    }
+  }, [allSchedules, schedule.ID]);
 
   const getInfomation = (text: string) => {
     const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
@@ -238,6 +274,11 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
               {classStatus(schedule.TinhTrang) !== "" && (
                 <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
                   {classStatus(schedule.TinhTrang)}
+                </Badge>
+              )}
+              {duplicateInfo.isDuplicate && (
+                <Badge className="bg-gradient-to-r from-orange-500 to-amber-600 text-white px-2.5 py-1 rounded-full shadow">
+                  {duplicateInfo.duplicateSchedules?.length ? duplicateInfo.duplicateSchedules.length - 1 : 0} lịch trùng
                 </Badge>
               )}
               {schedule.CalenType === 2 && (
@@ -415,6 +456,26 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                   <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến</div>
                   <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
                     {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Duplicate Schedule Info */}
+            {duplicateInfo.isDuplicate && duplicateInfo.duplicateSchedules && (
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px] border border-orange-200 dark:border-orange-700">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs sm:text-sm text-orange-700 dark:text-orange-300 font-semibold">
+                    Cảnh báo: Lịch trùng thời gian
+                  </div>
+                  <div className="text-sm sm:text-base font-semibold text-orange-900 dark:text-orange-100">
+                    Có {duplicateInfo.duplicateSchedules.length - 1} lịch cùng thời gian
+                  </div>
+                  <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    {duplicateInfo.status?.statusText && `Trạng thái: ${duplicateInfo.status.statusText}`}
                   </div>
                 </div>
               </div>

@@ -6,6 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScheduleItem, ExamInfo } from '@/types/schedule';
 import { getRealtimeStatus } from '@/utils/dateUtils';
+import { 
+  detectDuplicateSchedules, 
+  addScheduleMetadata, 
+  ScheduleWithMetadata
+} from '@/utils/scheduleUtils';
+import { DuplicateScheduleWarning } from './DuplicateScheduleWarning';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './Timetable.css';
@@ -34,7 +40,7 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  resource: ScheduleItem | (ExamInfo & { __isExam: true });
+  resource: ScheduleWithMetadata | (ExamInfo & { __isExam: true });
 }
 
 const getStatusColor = (status: number, is_cancelled: boolean, is_changed_schedule: boolean) => {
@@ -93,12 +99,29 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
   const isDesktop = screenSize === 'desktop';
 
   const events: CalendarEvent[] = useMemo(() => {
-    const subjectEvents: CalendarEvent[] = schedules.map(schedule => {
+    // Thêm metadata và xử lý lịch trùng
+    const schedulesWithMetadata = addScheduleMetadata(schedules);
+    const duplicates = detectDuplicateSchedules(schedules);
+    
+    const subjectEvents: CalendarEvent[] = schedulesWithMetadata.map(schedule => {
       const startDate = new Date(schedule.ThoiGianBD);
       const endDate = new Date(schedule.ThoiGianKT);
+      
+      // Thêm indicator cho lịch trùng
+      let title = `${schedule.TenMonHoc} - ${schedule.TenNhom}`;
+      if (schedule.isDuplicate) {
+        const duplicateGroup = duplicates.find(d => 
+          d.schedules.some(s => s.ID === schedule.ID)
+        );
+        if (duplicateGroup) {
+          const isPrimary = schedule.priority === 1; // Lịch bình thường có priority = 1
+          title += isPrimary ? ' ⭐' : ' 🔄';
+        }
+      }
+      
       return {
         id: schedule.ID,
-        title: `${schedule.TenMonHoc} - ${schedule.TenNhom}`,
+        title,
         start: startDate,
         end: endDate,
         resource: schedule,
@@ -141,11 +164,16 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     return [...subjectEvents, ...examEvents];
   }, [schedules, exams, examDurationMinutes]);
 
+  // Phát hiện lịch trùng để hiển thị cảnh báo
+  const duplicates = useMemo(() => detectDuplicateSchedules(schedules), [schedules]);
+
   const eventStyleGetter = useCallback((event: CalendarEvent) => {
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
     const isExam = (event.resource as any).__isExam === true;
-    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang === 2;
-    const is_changed_schedule = !isExam && (event.resource as ScheduleItem).TinhTrang === 1;
+    const scheduleResource = event.resource as ScheduleWithMetadata;
+    const is_cancelled = !isExam && scheduleResource.TinhTrang === 2;
+    const is_changed_schedule = !isExam && scheduleResource.TinhTrang === 1;
+    const is_duplicate = !isExam && scheduleResource.isDuplicate;
     const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled, is_changed_schedule);
     
     const getColorValue = (colorClass: string) => {
@@ -181,14 +209,14 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       style: {
         backgroundColor: getColorValue(color),
         borderRadius: getBorderRadius(),
-        opacity: 0.9,
+        opacity: is_duplicate ? 0.8 : 0.9,
         color: 'white',
-        border: '0px',
+        border: is_duplicate ? '2px solid #f59e0b' : '0px',
         display: 'block',
         fontSize: getFontSize(),
         fontWeight: '500',
         padding: getPadding(),
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        boxShadow: is_duplicate ? '0 2px 6px rgba(245, 158, 11, 0.3)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.2s ease-in-out',
       }
     };
@@ -200,8 +228,10 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       event.end.toISOString()
     );
     const isExam = (event.resource as any).__isExam === true;
-    const is_cancelled = !isExam && (event.resource as ScheduleItem).TinhTrang === 2;
-    const is_changed_schedule = !isExam && (event.resource as ScheduleItem).TinhTrang === 1;
+    const scheduleResource = event.resource as ScheduleWithMetadata;
+    const is_cancelled = !isExam && scheduleResource.TinhTrang === 2;
+    const is_changed_schedule = !isExam && scheduleResource.TinhTrang === 1;
+    const is_duplicate = !isExam && scheduleResource.isDuplicate;
     const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled, is_changed_schedule);
     
     const getPaddingClass = () => {
@@ -235,9 +265,12 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               const name = (event.resource as any).TenKT as string;
               return truncateText(name, getMaxLength());
             } else {
-              const subj = (event.resource as ScheduleItem).TenMonHoc;
-              const group = (event.resource as ScheduleItem).TenNhom;
-              const title = `${subj} - ${group}`;
+              const subj = scheduleResource.TenMonHoc;
+              const group = scheduleResource.TenNhom;
+              let title = `${subj} - ${group}`;
+              if (is_duplicate) {
+                title += scheduleResource.priority === 1 ? ' ⭐' : ' 🔄';
+              }
               return truncateText(title, getMaxLength());
             }
           })()}
@@ -250,7 +283,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
                   const r = event.resource as any;
                   return r.PhongThi || r.CSS || 'Không có địa điểm';
                 }
-                const r = event.resource as ScheduleItem;
+                const r = scheduleResource;
                 return r.TenPhong || r.OnlineLink || 'Không có địa điểm';
               })()}
             </div>
@@ -258,7 +291,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           <div className={`line-clamp-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>
             {(() => {
               if (isExam) return '';
-              const teacher = (event.resource as ScheduleItem).GiaoVien;
+              const teacher = scheduleResource.GiaoVien;
               return truncateText(teacher, getMaxLength());
             })()}
           </div>
@@ -393,6 +426,11 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      {/* Cảnh báo lịch trùng */}
+      {duplicates.length > 0 && (
+        <DuplicateScheduleWarning duplicates={duplicates} />
+      )}
+      
       {/* Thống kê nhanh */}
       <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50">
         <CardHeader className="pb-2 sm:pb-3">
