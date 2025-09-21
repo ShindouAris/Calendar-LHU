@@ -134,7 +134,7 @@ export const StudentSchedule: React.FC = () => {
       const apiRequest = {
         Ngay: new Date().toISOString(),
         PageIndex: 1,
-        PageSize: 50,
+        PageSize: 200,
         StudentID: studentId
       };
 
