@@ -158,23 +158,23 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     }
   }, [allSchedules, schedule.ID]);
 
-  // const getInfomation = (text: string) => {
-  //   const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
+  const getInfomation = (text: string) => {
+    const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
 
-  //   const match = text.match(regex)
+    const match = text.match(regex)
 
-  //   console.log(`Matched: ${match}`)
+    console.log(`Matched: ${match}`)
     
-  //   if (match) {
-  //     setNhomHoc(match[1])
-  //     setInfomation(match[2])
-  //   }
-  // }
+    if (match) {
+      setNhomHoc(match[1])
+      setInfomation(match[2])
+    }
+  }
 
-  // useEffect(() => {
-  //   console.log(`Getting infomation - ${schedule.TenNhom}`)
-  //   getInfomation(schedule.TenNhom)
-  // }, [schedule.TenNhom])
+  useEffect(() => {
+    console.log(`Getting infomation - ${schedule.TenNhom}`)
+    getInfomation(schedule.TenNhom)
+  }, [schedule.TenNhom])
 
   useEffect(() => {
 
