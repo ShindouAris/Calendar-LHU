@@ -77,6 +77,9 @@ export const getNextClass = (schedules: any[]): any | null => {
     .filter(schedule => {
       try {
         const classDate = parseISO(schedule.ThoiGianBD);
+        // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
+        const isCancelledOrOff = schedule?.TinhTrang === 1 || schedule?.TinhTrang === 2;
+        if (isCancelledOrOff) return false;
         return isAfter(classDate, now);
       } catch {
         return false;
@@ -94,7 +97,11 @@ export const getNextClass = (schedules: any[]): any | null => {
 
 
 export const hasClassesInNext7Days = (schedules: any[]): boolean => {
-  return schedules.some((schedule: any) => isWithinNext7Days(schedule.ThoiGianBD));
+  return schedules.some((schedule: any) => {
+    // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
+    if (schedule?.TinhTrang === 1 || schedule?.TinhTrang === 2) return false;
+    return isWithinNext7Days(schedule.ThoiGianBD);
+  });
 };
 
 // Tính trạng thái tiết học theo thời gian thực

@@ -114,8 +114,7 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
                                   : 'border-red-300 text-red-700 dark:border-red-600 dark:text-red-300'
                               }`}
                             >
-                              {schedule.TinhTrang === 0 ? 'Bình thường' : 
-                               schedule.TinhTrang === 1 ? 'Dời lịch' : 'Báo nghỉ'}
+                              {schedule.TinhTrang === 0 ? 'Bình thường' : 'Báo nghỉ'}
                             </Badge>
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">

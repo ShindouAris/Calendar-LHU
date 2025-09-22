@@ -38,6 +38,7 @@ export const StudentSchedule: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState("home"); // synced with URL
   const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
+  const [showCancelled, setShowCancelled] = useState(false); // ẩn lịch huỷ/báo nghỉ mặc định
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
   const [avatar, setAvatar] = useState("")
   const user = AuthStorage.getUser()
@@ -353,7 +354,12 @@ export const StudentSchedule: React.FC = () => {
     ? schedules 
     : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
 
-  const displaySchedules = baseSchedules.filter(s => {
+  // Tuỳ chọn hiển thị lịch huỷ/báo nghỉ
+  const activeSchedules = showCancelled 
+    ? baseSchedules 
+    : baseSchedules.filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
+
+  const displaySchedules = activeSchedules.filter(s => {
     if (showEnded) return true;
     const status = getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT);
     return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF
@@ -630,6 +636,10 @@ export const StudentSchedule: React.FC = () => {
               <div className="flex items-center gap-2 shrink-0">
                 <Switch id="toggle-ended" checked={showEnded} onCheckedChange={setShowEnded} />
                 <Label htmlFor="toggle-ended" className="whitespace-nowrap">Hiển thị lớp đã kết thúc</Label>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Switch id="toggle-cancelled" checked={showCancelled} onCheckedChange={setShowCancelled} />
+                <Label htmlFor="toggle-cancelled" className="whitespace-nowrap">Hiển thị lịch hủy/báo nghỉ</Label>
               </div>
             </div>
 

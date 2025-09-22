@@ -72,7 +72,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
       case 0: 
         return "";
       case 1: 
-        return "Dời lịch";
+        return "Hủy";
       case 2:
         return "Báo Nghỉ";
       default: 
@@ -158,23 +158,23 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     }
   }, [allSchedules, schedule.ID]);
 
-  const getInfomation = (text: string) => {
-    const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
+  // const getInfomation = (text: string) => {
+  //   const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
 
-    const match = text.match(regex)
+  //   const match = text.match(regex)
 
-    console.log(`Matched: ${match}`)
+  //   console.log(`Matched: ${match}`)
     
-    if (match) {
-      setNhomHoc(match[1])
-      setInfomation(match[2])
-    }
-  }
+  //   if (match) {
+  //     setNhomHoc(match[1])
+  //     setInfomation(match[2])
+  //   }
+  // }
 
-  useEffect(() => {
-    console.log(`Getting infomation - ${schedule.TenNhom}`)
-    getInfomation(schedule.TenNhom)
-  }, [schedule.TenNhom])
+  // useEffect(() => {
+  //   console.log(`Getting infomation - ${schedule.TenNhom}`)
+  //   getInfomation(schedule.TenNhom)
+  // }, [schedule.TenNhom])
 
   useEffect(() => {
 
@@ -190,20 +190,17 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
 
   // Weather forecast (only if class within 3 days)
   const [forecastHour, setForecastHour] = useState<HourForecast | null>(null)
+  const [breakpoint, setbreakpoint] = useState<boolean>(false)
   useEffect(() => {
     const now = Date.now()
     const start = new Date(schedule.ThoiGianBD).getTime()
+    if (breakpoint) {
+      return
+    }
     const threeDaysMs = 3 * 24 * 60 * 60 * 1000
-    console.log('[WeatherForecast] Kiểm tra thời gian tiết học:', {
-      now,
-      start,
-      ThoiGianBD: schedule.ThoiGianBD,
-      cách_bao_nhiêu_ms: start - now,
-      quá_3_ngày: start - now > threeDaysMs,
-    })
     if (isNaN(start) || start - now > threeDaysMs) {
-      console.log('[WeatherForecast] Không lấy dự báo thời tiết vì tiết học ngoài phạm vi 3 ngày.')
       setForecastHour(null)
+      setbreakpoint(true)
       return
     }
     let cancelled = false
@@ -228,6 +225,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     return () => {
       cancelled = true
       console.log('[WeatherForecast] Hủy lấy dự báo thời tiết (unmount hoặc đổi tiết học)')
+      setbreakpoint(false)
     }
   }, [schedule.ThoiGianBD])
 
