@@ -145,7 +145,7 @@ export const StudentSchedule: React.FC = () => {
       const apiRequest = {
         Ngay: new Date().toISOString(),
         PageIndex: 1,
-        PageSize: 30, // lock 30 tiết, phân trang bằng cách tăng PageIndex, tính toán băng cách lấy TotalRecord / 30
+        PageSize: 300, // lock 30 tiết, phân trang bằng cách tăng PageIndex, tính toán băng cách lấy TotalRecord / 30
         StudentID: studentId
       };
 
