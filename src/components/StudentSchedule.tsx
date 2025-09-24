@@ -145,7 +145,7 @@ export const StudentSchedule: React.FC = () => {
       const apiRequest = {
         Ngay: new Date().toISOString(),
         PageIndex: 1,
-        PageSize: 200,
+        PageSize: 30, // lock 30 tiết, phân trang bằng cách tăng PageIndex, tính toán băng cách lấy TotalRecord / 30
         StudentID: studentId
       };
 
@@ -525,7 +525,7 @@ export const StudentSchedule: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <StatsCard
                 title="Tổng số tiết"
-                value={schedules.length}
+                value={weekInfo.TotalRecord}
                 icon={BookOpen}
                 color="blue"
                 description="Tiết học trong kì"
