@@ -15,7 +15,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock3,
-  MessageSquareWarning,
   AlertTriangle
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
@@ -124,10 +123,6 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     return () => window.removeEventListener('resize', evaluateOverflow)
   }, [])
 
-  const [infomation, setInfomation]= useState<string | null>(null)
-
-  const [nhomHoc, setNhomHoc] = useState<string | null>(null)
-
   // Phát hiện lịch trùng
   const [duplicateInfo, setDuplicateInfo] = useState<{
     isDuplicate: boolean;
@@ -157,24 +152,6 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
       }
     }
   }, [allSchedules, schedule.ID]);
-
-  const getInfomation = (text: string) => {
-    const regex = /^(.+?)\s*\(\s*(.+?)\s*\)$/;
-
-    const match = text.match(regex)
-
-    console.log(`Matched: ${match}`)
-    
-    if (match) {
-      setNhomHoc(match[1])
-      setInfomation(match[2])
-    }
-  }
-
-  useEffect(() => {
-    console.log(`Getting infomation - ${schedule.TenNhom}`)
-    getInfomation(schedule.TenNhom)
-  }, [schedule.TenNhom])
 
   useEffect(() => {
 
@@ -355,29 +332,6 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                 </TooltipProvider>
               </div>
             </div>
-            {/* Lưu ý chuyển lên cuối cột trái */}
-            {infomation !== null && (
-              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-yellow-50 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 rounded-xl min-h-[60px] sm:min-h-[72px] border border-yellow-300 dark:border-yellow-700">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                  <MessageSquareWarning className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-semibold">Lưu ý</div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-sm sm:text-base font-semibold text-yellow-900 dark:text-yellow-100 cursor-help line-clamp-2 hover:line-clamp-none transition-all">
-                          {infomation}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs">
-                        <p className="text-sm">{infomation}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Column */}
@@ -392,11 +346,11 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div ref={groupNameRef} className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
-                        {nhomHoc ? nhomHoc : schedule.TenNhom}
+                        {schedule.TenNhom}
                       </div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-sm">{nhomHoc ? nhomHoc : schedule.TenNhom}</p>
+                      <p className="text-sm">{schedule.TenNhom}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
