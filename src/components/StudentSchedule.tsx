@@ -51,6 +51,17 @@ export const StudentSchedule: React.FC = () => {
     cacheService.init();
   }, [AuthStorage.getUser()?.UserID]);
 
+  // lấy lịch của mình luôn
+  useEffect(() => {
+    
+    if (AuthStorage.isLoggedIn() && AuthStorage.getUser()?.UserID ) {
+      const userid = AuthStorage.getUser()?.UserID
+      fetchSchedule(String(userid))
+      fetchPrivateExam(String(userid))
+      console.log("Lấy id sinh viên thành công")
+    }
+  }, []) // mount thì chạy 1 lần fr
+
   useEffect(() => {
     getAvatar();
   }, [])
