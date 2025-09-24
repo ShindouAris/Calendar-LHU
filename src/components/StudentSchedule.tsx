@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School } from 'lucide-react';
@@ -145,7 +145,7 @@ export const StudentSchedule: React.FC = () => {
       const apiRequest = {
         Ngay: new Date().toISOString(),
         PageIndex: 1,
-        PageSize: 300, // lock 30 tiết, phân trang bằng cách tăng PageIndex, tính toán băng cách lấy TotalRecord / 30
+        PageSize: 300,
         StudentID: studentId
       };
 
@@ -177,6 +177,58 @@ export const StudentSchedule: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  // Precompute schedule-related data early so hooks below are unconditional
+  const studentInfo = scheduleData?.data?.[0]?.[0];
+  const weekInfo = scheduleData?.data?.[1]?.[0];
+  const schedules = scheduleData?.data?.[2] || [];
+
+  const nextClass = getNextClass(schedules);
+  const hasUpcomingClasses = hasClassesInNext7Days(schedules);
+
+  const baseSchedules = showFullSchedule 
+    ? schedules 
+    : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
+
+  // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
+  const activeSchedules = baseSchedules.filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
+
+  const displaySchedules = activeSchedules.filter(s => {
+    if (showEnded) return true;
+    const status = getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT);
+    return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF
+  });
+
+  // Incremental rendering to avoid mounting too many heavy cards
+  const INITIAL_COUNT = 10;
+  const LOAD_MORE_STEP = 10;
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_COUNT);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Reset visibleCount when filters or data change
+  useEffect(() => {
+    setVisibleCount(INITIAL_COUNT);
+  }, [showFullSchedule, showEnded, scheduleData]);
+
+  const visibleSchedules = useMemo(() => {
+    return displaySchedules.slice(0, visibleCount);
+  }, [displaySchedules, visibleCount]);
+
+  // Auto-load more when scrolling near bottom using IntersectionObserver
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    if (visibleCount >= displaySchedules.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setVisibleCount((c) => Math.min(c + LOAD_MORE_STEP, displaySchedules.length));
+        }
+      });
+    }, { root: null, rootMargin: '0px', threshold: 1.0 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, displaySchedules.length]);
 
   const fetchPrivateExam = useCallback(async (studentId: string) => {
     setLoadingExam(true);
@@ -353,25 +405,7 @@ export const StudentSchedule: React.FC = () => {
     );
   }
 
-  const studentInfo = scheduleData.data[0]?.[0];
-  const weekInfo = scheduleData.data[1]?.[0];
-  const schedules = scheduleData.data[2] || [];
-
-  const nextClass = getNextClass(schedules);
-  const hasUpcomingClasses = hasClassesInNext7Days(schedules);
-
-  const baseSchedules = showFullSchedule 
-    ? schedules 
-    : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
-
-  // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
-  const activeSchedules = baseSchedules.filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
-
-  const displaySchedules = activeSchedules.filter(s => {
-    if (showEnded) return true;
-    const status = getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT);
-    return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF
-  });
+  // (đã chuyển tính toán schedule lên trên để tránh thay đổi thứ tự hooks)
 
   const buildICSDate = (isoString: string): string => {
     try {
@@ -525,7 +559,7 @@ export const StudentSchedule: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               <StatsCard
                 title="Tổng số tiết"
-                value={weekInfo.TotalRecord}
+                value={weekInfo?.TotalRecord ?? 0}
                 icon={BookOpen}
                 color="blue"
                 description="Tiết học trong kì"
@@ -659,14 +693,28 @@ export const StudentSchedule: React.FC = () => {
                   </CardContent>
                 </Card>
               ) : (
-                displaySchedules.map((schedule, index) => (
-                  <ScheduleCard
-                    key={schedule.ID || index}
-                    schedule={schedule}
-                    isNext={nextClass?.ID === schedule.ID}
-                    allSchedules={schedules}
-                  />
-                ))
+                <>
+                  {visibleSchedules.map((schedule, index) => (
+                    <ScheduleCard
+                      key={schedule.ID || index}
+                      schedule={schedule}
+                      isNext={nextClass?.ID === schedule.ID}
+                      allSchedules={schedules}
+                    />
+                  ))}
+                  {visibleCount < displaySchedules.length && (
+                    <div className="flex flex-col items-center gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => setVisibleCount(c => Math.min(c + LOAD_MORE_STEP, displaySchedules.length))}
+                        className="w-full sm:w-auto"
+                      >
+                        Tải thêm
+                      </Button>
+                      <div ref={sentinelRef} className="h-1 w-full opacity-0" />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </>

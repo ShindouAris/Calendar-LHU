@@ -32,7 +32,7 @@ interface ScheduleCardProps {
   allSchedules?: ScheduleItem[]; // Thêm để phát hiện lịch trùng
 }
 
-export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = false, allSchedules = [] }) => {
+const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = false, allSchedules = [] }) => {
   const getStatusConfig = (status: number) => {
     switch (status) {
       case 1:
@@ -471,3 +471,30 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({ schedule, isNext = f
     </Card>
   );
 };
+
+// Tránh re-render không cần thiết
+const areEqual = (prev: ScheduleCardProps, next: ScheduleCardProps) => {
+  const a = prev.schedule;
+  const b = next.schedule;
+  if ((prev.isNext ?? false) !== (next.isNext ?? false)) return false;
+  // Nếu reference danh sách thay đổi (ảnh hưởng phát hiện trùng), cho phép rerender
+  if (prev.allSchedules !== next.allSchedules) return false;
+  return (
+    a.ID === b.ID &&
+    a.ThoiGianBD === b.ThoiGianBD &&
+    a.ThoiGianKT === b.ThoiGianKT &&
+    a.TinhTrang === b.TinhTrang &&
+    a.TenPhong === b.TenPhong &&
+    a.GiaoVien === b.GiaoVien &&
+    a.TenNhom === b.TenNhom &&
+    a.CalenType === b.CalenType &&
+    a.Type === b.Type &&
+    a.GoogleMap === b.GoogleMap &&
+    a.OnlineLink === b.OnlineLink &&
+    a.Thu === b.Thu &&
+    a.SoTietBuoi === b.SoTietBuoi &&
+    a.TenCoSo === b.TenCoSo
+  );
+};
+
+export const ScheduleCard = React.memo(ScheduleCardInner, areEqual);
