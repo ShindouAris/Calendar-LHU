@@ -12,6 +12,7 @@ export class ApiService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(request),
+      signal: AbortSignal.timeout(5000)
     });
 
     if (!response.ok) {
