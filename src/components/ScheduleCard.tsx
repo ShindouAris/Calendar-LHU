@@ -209,8 +209,8 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   return (
     <Card className={`group transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
       isNext 
-        ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-600 dark:via-indigo-500 dark:to-purple-600 shadow-blue-200 dark:shadow-blue-700' 
-        : 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-400 dark:via-red-400 dark:to-pink-400'
+        ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 shadow-blue-200 dark:shadow-blue-700' 
+        : 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-800 dark:via-red-800 dark:to-pink-800'
     }`}>
       {/* Next Class Banner */}
       {isNext && (
@@ -229,7 +229,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-400 to-indigo-300 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-300 group-hover:to-violet-200 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
+                  <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-800 to-indigo-600 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-violet-400 group-hover:dark:from-blue-300 group-hover:dark:to-violet-300 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
                     {schedule.TenMonHoc}
                   </h3>
                 </TooltipTrigger>
