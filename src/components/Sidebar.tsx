@@ -209,7 +209,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         key={item.id}
                         onClick={() => {
                           if (item.url) {
-                            window.location.href = item.url
+                            // window.location.href = item.url
+                            window.open(item.url, "_blank", "noopener,noreferrer")
                           }
                           if (item.authrequired && !isAuth) {
                             toast.error("Vui lòng đăng nhập để truy cập trang này")
