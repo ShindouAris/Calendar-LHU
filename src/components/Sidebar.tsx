@@ -24,7 +24,7 @@ interface SidebarProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
@@ -93,6 +93,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Thời tiết',
       icon: Sun,
       description: 'Thông tin thời tiết hiện tại'
+    },
+    {
+      id: "diemdanh",
+      label: "Điểm danh",
+      icon: PiExamDuotone,
+      description: "Xem thông tin điểm danh (cần đăng nhập)",
+      authrequired: true,
     },
     {
       id: "mark",

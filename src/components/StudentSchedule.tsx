@@ -26,6 +26,7 @@ import { AuthStorage } from '@/types/user';
 import { MarkPage } from './StudentMark';
 import { examCacheService } from '@/services/examCacheService';
 import { ExamCard } from './ExamCard';
+import { LmsDiemDanhPage } from './LmsDiemDanhPage';
 import { authService } from '@/services/authService';
 
 export const StudentSchedule: React.FC = () => {
@@ -88,7 +89,9 @@ export const StudentSchedule: React.FC = () => {
       setPage("weather");
     } else if (path.startsWith("/mark")) {
       setPage("mark")
-    } 
+    } else if (path.startsWith("/diemdanh")) {
+      setPage("diemdanh")
+    }
     else {
       setPage("home");
     }
@@ -319,6 +322,10 @@ export const StudentSchedule: React.FC = () => {
       setPage("mark")
       setShowFullSchedule(false);
       navigate("/mark")
+    } else if (newPage === "diemdanh") {
+      setPage("diemdanh")
+      setShowFullSchedule(false);
+      navigate("/diemdanh")
     }
   };
 
@@ -339,6 +346,23 @@ export const StudentSchedule: React.FC = () => {
         </div>
       </Layout>
     );
+  }
+  if (page === "diemdanh") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title="Điểm danh"
+      >
+        <div className="min-h-screen py-6 sm:py-8 px-4">
+          <div className="max-w-6xl mx-auto">
+            <LmsDiemDanhPage />
+          </div>
+        </div>
+      </Layout>
+    )
   }
 
   if (error) {

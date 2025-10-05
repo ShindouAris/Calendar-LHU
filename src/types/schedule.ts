@@ -66,3 +66,16 @@ export interface ExamInfo {
 export interface ExamResponse {
   data: [ExamInfo]
 }
+
+export interface DiemDanhData {
+  data: DiemDanhOut[] | [] ;
+}
+
+export interface DiemDanhOut {
+  TenMonHoc: string;
+  TrangThai: number;
+  ThoiGianDiemDanh: string | null;
+  ThoiGianQuetQRCode: string;
+  NgayHoc: string;
+  HoTenGV: string;
+}
