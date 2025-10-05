@@ -41,6 +41,7 @@ export const Layout: React.FC<LayoutProps> = ({
       const logoutmsg: string | null = await authService.logOut();
       if (logoutmsg) {
         toast.success(logoutmsg)
+        window.location.reload();
       }
     } catch (error) {
       if (error instanceof Error) {
