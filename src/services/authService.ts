@@ -6,10 +6,14 @@ export interface LoginRequestBody {
   DeviceInfo: string;
   UserID: string;
   Password: string;
+  cf_verify_token: string;
 }
 
 export const authService = {
-  async login(body: LoginRequestBody): Promise<void> {
+  async login(body: LoginRequestBody, turnstile_instance: any): Promise<void> {
+    if (body.cf_verify_token === "") {
+      throw new Error("Vui lòng hoàn thành bài kiểm tra bảo mật")
+    }
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -18,6 +22,9 @@ export const authService = {
     });
     if (!response.ok) {
       let msg = `Đăng nhập thất bại (${response.status})`;
+      if ("reset" in turnstile_instance) {
+        turnstile_instance.reset()
+      }
       try {
         const ct = response.headers.get('content-type') || '';
         if (ct.includes('application/json')) {
