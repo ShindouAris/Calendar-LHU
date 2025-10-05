@@ -37,6 +37,9 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
       setError(null);
       try {
         const data = await authService.getMark();
+        if (data?.reason) {
+          setError(data.reason)
+        }
         setMarks(data ?? null);
       } catch (e) {
         if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
@@ -121,7 +124,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
 
       {error && (
         <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">{error}</CardContent>
+          <CardContent className="py-8 text-center text-red-600 dark:text-red-400" dangerouslySetInnerHTML={{__html: error}}></CardContent>
         </Card>
       )}
 
