@@ -194,7 +194,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Navigation Section */}
             <div className="space-y-1">
               <button
-                onClick={() => toggleExpanded('navigation')}
+                onClick={() => {toggleExpanded('navigation'); (expandedItems.includes("actions") && toggleExpanded("actions"))}}
                 className="flex items-center justify-between w-full p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 <span>Điều hướng</span>
@@ -260,7 +260,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {actionItems.length > 0 && (
               <div className="space-y-1 pt-4 border-t border-gray-200 dark:border-gray-800">
                 <button
-                  onClick={() => toggleExpanded('actions')}
+                  onClick={() => {toggleExpanded('actions'); (expandedItems.includes("navigation") && toggleExpanded("navigation"))}}
                   className="flex items-center justify-between w-full p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
                   <span>Hành động</span>
