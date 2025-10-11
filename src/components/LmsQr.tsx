@@ -8,7 +8,7 @@ import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import  * as dayjs from "dayjs"
-import 'dayjs/locate/vi-vn'
+// import 'dayjs/locate/vi-vn'
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -72,7 +72,7 @@ export const QRScanner: React.FC = () => {
         setError(String(res.error))
       }
       else { 
-        toast.success(`Điểm danh thành công - ${dayjs().locale('vi-vn')}`)
+        toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
         qrScanner?.start()
       }})
   }, [scanned])

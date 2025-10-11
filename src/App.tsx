@@ -13,7 +13,6 @@ function App() {
       <Route path="/weather" element={<StudentSchedule />} />
       <Route path='/diemdanh' element={<StudentSchedule />} />
       <Route path='/mark' element={<StudentSchedule />} />
-      <Route path='/chat' element={<Chat />} />
       <Route path='/qrscan' element={<StudentSchedule/>}/>
       <Route path="*" element={<StudentSchedule />} />
     </Routes>
