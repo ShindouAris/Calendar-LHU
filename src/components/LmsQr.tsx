@@ -51,6 +51,7 @@ export const QRScanner: React.FC = () => {
 
     if (scanned.includes("http")) {
       window.open(scanned)
+      return
     }
 
     const access_token = localStorage.getItem("access_token")
@@ -59,6 +60,7 @@ export const QRScanner: React.FC = () => {
 
     if (scanned !== "" && scanned.substring(0,3) !== "STB") {
       setError("QR này không được hỗ trợ...")
+      return
     }
 
     qrScanner?.pause() // paused to not to spam the api
