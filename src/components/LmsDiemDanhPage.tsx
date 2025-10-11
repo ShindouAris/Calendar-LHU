@@ -101,12 +101,12 @@ const DiemDanhCard: React.FC<{ item: DiemDanhOut }> = ({ item }) => {
           </span>
         </div>
         
-        <div className="flex items-center justify-between">
+        {item.ThoiGianQuetQRCode && (<div className="flex items-center justify-between">
           <span className="text-gray-600 dark:text-gray-400">Quét QR:</span>
           <span className="font-medium text-gray-800 dark:text-gray-200">
             {formatDateTime(item.ThoiGianQuetQRCode)}
           </span>
-        </div>
+        </div>)}
 
         {item.ThoiGianDiemDanh && (
           <div className="flex items-center justify-between">
