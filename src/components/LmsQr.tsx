@@ -7,6 +7,8 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import  * as dayjs from "dayjs"
+import 'dayjs/locate/vi-vn'
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -43,7 +45,7 @@ export const QRScanner: React.FC = () => {
 
   useEffect(() => {
 
-    qrScanner?.pause()
+    // qrScanner?.pause()
 
     setError(null)
 
@@ -59,6 +61,8 @@ export const QRScanner: React.FC = () => {
       setError("QR này không được hỗ trợ...")
     }
 
+    qrScanner?.pause() // paused to not to spam the api
+
 
     ApiService.send_diem_danh(scanned, access_token).then((res) => {
       
@@ -67,47 +71,10 @@ export const QRScanner: React.FC = () => {
       if (!res.success) {
         setError(String(res.error))
       }
-      else {
-        toast.custom((t) => (
-           <div
-             className={`${
-               t.visible ? 'animate-custom-enter' : 'animate-custom-leave'
-             } max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
-           >
-             <div className="flex-1 w-0 p-4">
-               <div className="flex items-start">
-                 <div className="flex-shrink-0 pt-0.5">
-                   <img
-                     className="h-10 w-10 rounded-full"
-                     src=""
-                     alt=""
-                   />
-                 </div>
-                 <div className="ml-3 flex-1">
-                   <p className="text-sm font-medium text-gray-900">
-                     Điểm danh
-                   </p>
-                   <p className="mt-1 text-sm text-gray-500">
-                     Điểm danh thành công
-                   </p>
-                 </div>
-               </div>
-             </div>
-             <div className="flex border-l border-gray-200">
-               <button
-                 onClick={() => toast.dismiss(t.id)}
-                 className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-               >
-                 Close
-               </button>
-             </div>
-           </div>
-        ))
-      }
-      
-       
-      }
-    )
+      else { 
+        toast.success(`Điểm danh thành công - ${dayjs().locale('vi-vn')}`)
+        qrScanner?.start()
+      }})
   }, [scanned])
 
   const handleReset = () => {
@@ -117,7 +84,7 @@ export const QRScanner: React.FC = () => {
 
   const handleBack = () => {
     setScanned("")
-    qrScanner?.stop()
+    // qrScanner?.stop()
     nav("/")
   }
 
@@ -146,7 +113,7 @@ export const QRScanner: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white select-none">
+    <div className="flex flex-col rounded-md items-center justify-center min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-white select-none">
       <Card className="w-[360px] bg-gray-800 border-gray-700 shadow-lg rounded-2xl overflow-hidden">
         <CardContent className="p-4 flex flex-col items-center space-y-4">
           <div
@@ -175,7 +142,7 @@ export const QRScanner: React.FC = () => {
               <p>{scanned}</p>
             </div>
           ) : (
-            <p className="text-gray-500 italic">Waiting for QR code...</p>
+            <p className="text-gray-500 italic">Đang tìm QrCode...</p>
           )}
 
           {error && (
