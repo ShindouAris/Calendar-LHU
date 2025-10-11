@@ -28,6 +28,7 @@ import { examCacheService } from '@/services/examCacheService';
 import { ExamCard } from './ExamCard';
 import { LmsDiemDanhPage } from './LmsDiemDanhPage';
 import { authService } from '@/services/authService';
+import { QRScanner } from './LmsQr';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -91,6 +92,8 @@ export const StudentSchedule: React.FC = () => {
       setPage("mark")
     } else if (path.startsWith("/diemdanh")) {
       setPage("diemdanh")
+    } else if (path.startsWith("/qrscan")) {
+      setPage("qrscan")
     }
     else {
       setPage("home");
@@ -326,6 +329,10 @@ export const StudentSchedule: React.FC = () => {
       setPage("diemdanh")
       setShowFullSchedule(false);
       navigate("/diemdanh")
+    } else if (newPage === "qrscan") {
+      setPage("qrscan")
+      setShowFullSchedule(false)
+      navigate("/qrscan")
     }
   };
 
@@ -359,6 +366,24 @@ export const StudentSchedule: React.FC = () => {
         <div className="min-h-screen py-6 sm:py-8 px-4">
           <div className="max-w-6xl mx-auto">
             <LmsDiemDanhPage />
+          </div>
+        </div>
+      </Layout>
+    )
+  } 
+
+  if (page === "qrscan") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title="Quét mã điểm danh"
+      >
+        <div className="min-h-screen py-6 sm:py-8 px-4">
+          <div className="max-w-6xl mx-auto">
+            <QRScanner />
           </div>
         </div>
       </Layout>

@@ -207,5 +207,32 @@ export class ApiService {
       } catch (error) {
         return {data: []}
     }
+  };
+  static async send_diem_danh(qr_code: string, access_token: string) {
+    if (qr_code === "") return
+    try {
+      const res = await fetch(`${API_ENDPOINT}/lms/checkin`, {
+        method: "POST", 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          accessToken: access_token,
+          qr_data: qr_code
+        })
+      })
+
+      if (!res.ok) {
+        return {success: false, error: await res.text()}
+      }
+
+      return {success: true}
+
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message)
+      }
+      throw error;
+    }
   }
 }

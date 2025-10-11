@@ -11,7 +11,8 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronDown,
-  LogOut
+  LogOut,
+  QrCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
@@ -24,7 +25,7 @@ interface SidebarProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh" | "qrscan") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
@@ -107,6 +108,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: PiExamDuotone,
       description: "Xem điểm thi của bạn (cần đăng nhập)",
       authrequired: true,
+    },
+    {
+      id: "qrscan",
+      label: "Quét QR",
+      icon: QrCode,
+      description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
+      authrequired: true
     },
     {
       id: 'GitHub',

@@ -13,7 +13,7 @@ interface LayoutProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark" | "diemdanh") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark" | "diemdanh" | "qrscan") => void;
   title?: string;
   isDark?: boolean;
 }
