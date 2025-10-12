@@ -18,8 +18,30 @@ export const QRScanner: React.FC = () => {
   const [success, setIsSuccess] = useState<boolean>(false)
   const nav = useNavigate()
 
+  const getCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false});
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        // grab the video track from the stream
+        const videoTrack = stream.getVideoTracks()[0];
+
+        // now you can do things like apply constraints dynamically too
+        videoTrack.applyConstraints({
+          // track-specific constraints
+          // @ts-ignore
+          advanced: [{ exposureMode: "continuous", focusMode: "continuous" }],
+        });
+      } catch (err) {
+        console.error("Lỗi khi truy cập camera:", err);
+      }
+    };
+
   useEffect(() => {
     if (!videoRef.current) return;
+
+    getCamera()
 
     const scanner = new QrScanner(
       videoRef.current,
@@ -31,7 +53,6 @@ export const QRScanner: React.FC = () => {
         returnDetailedScanResult: true,
         highlightScanRegion: true,
         highlightCodeOutline: true,
-        
       }
     );
     setQrScanner(scanner);
@@ -73,7 +94,7 @@ export const QRScanner: React.FC = () => {
     .then(() => {console.log("Tạm dừng camera vì đã tìm thấy QR phù hợp")})
     .catch((error) => {
       console.log("Thất bại trong việc nỗ lực dừng camera" + error)
-    }) // paused to not to spam the api
+    })
 
 
     ApiService.send_diem_danh(scanned, access_token).then((res) => {
@@ -126,7 +147,7 @@ export const QRScanner: React.FC = () => {
 
       if (lastDistance.current) {
         const zoomFactor = distance / lastDistance.current;
-        setScale((prev) => Math.min(Math.max(prev * zoomFactor, 1), 5)); // zoom range 1x–3x
+        setScale((prev) => Math.min(Math.max(prev * zoomFactor, 1), 5)); // zoom range 1x–5x
       }
 
       lastDistance.current = distance;
@@ -159,6 +180,7 @@ export const QRScanner: React.FC = () => {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
+              {videoRef.current ? (<div><img src="/cibi.png"/></div>) : (<></>)}
               <video
                 ref={videoRef}
                 autoPlay
