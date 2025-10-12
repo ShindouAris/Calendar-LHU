@@ -3,7 +3,7 @@ import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, CheckCircle, QrCode, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowLeft, QrCode, RefreshCw } from "lucide-react";
 import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
