@@ -381,10 +381,8 @@ export const StudentSchedule: React.FC = () => {
         onPageChange={handleChangeView}
         title="Quét mã điểm danh"
       >
-        <div className="min-h-screen py-6 sm:py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <QRScanner />
-          </div>
+        <div className="flex justify-center items-start px-4">
+          <QRScanner />
         </div>
       </Layout>
     )

@@ -214,13 +214,14 @@ export const QRScanner: React.FC = () => {
                   className="bg-green-50 border-l-4 border-green-500 p-4 rounded"
                 >
                   <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    {/* <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" /> */}
+                    <img className="w-8 h-8" src="/Success.gif" alt="Success"/>
                     <div className="flex-1">
                       <p className="text-green-800 font-medium text-sm">
                         Điểm danh thành công
                       </p>
                       <p className="text-green-700 text-xs mt-1 break-all">
-                        {scanned}
+                        {scanned ? scanned : "Không có data"}
                       </p>
                     </div>
                   </div>
