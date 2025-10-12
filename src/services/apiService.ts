@@ -223,7 +223,8 @@ export class ApiService {
       })
 
       if (!res.ok) {
-        return {success: false, error: await res.text()}
+        const data = await res.json()
+        return {success: false, error: data?.error}
       }
 
       return {success: true}
