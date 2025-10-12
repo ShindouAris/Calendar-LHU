@@ -174,7 +174,7 @@ export const QRScanner: React.FC = () => {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
         <CardContent className="p-0">
           {/* Scanner Container */}
-          <div className="relative w-full bg-black">
+          <div className="relative w-full bg-black overflow-hidden">
             <div
               className="relative w-full aspect-square touch-none"
               onTouchMove={handleTouchMove}
