@@ -20,7 +20,7 @@ export const QRScanner: React.FC = () => {
 
   const getCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false});
+        const stream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: "environment"}, audio: false});
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -67,7 +67,7 @@ export const QRScanner: React.FC = () => {
 
     if (scanned === "") return
 
-    if (scanned.includes("http")) {
+    if (scanned.startsWith("http")) {
       window.open(scanned)
       return
     }
