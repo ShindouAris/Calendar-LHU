@@ -11,6 +11,7 @@ import dayjs from "dayjs"
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null)
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
   const [scanned, setScanned] = useState<string>("");
   const [scale, setScale] = useState<number>(1);
@@ -24,11 +25,80 @@ export const QRScanner: React.FC = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        const current_track = stream.getVideoTracks()[0];
+        trackRef.current = current_track
       } catch (err) {
         console.error("Lỗi khi truy cập camera:", err);
       }
   };
 
+  const [zoomRange, setZoomRange] = useState<{min: number, max: number} | null>(null);
+
+// Get capabilities when track is ready
+  useEffect(() => {
+    const track = trackRef.current;
+    if (track) {
+      const capabilities = track.getCapabilities?.();
+      // @ts-ignore
+      if (capabilities?.zoom) {
+        setZoomRange({
+          // @ts-ignore
+          min: capabilities.zoom.min,
+          // @ts-ignore
+          max: capabilities.zoom.max
+        });
+        // @ts-ignore
+        console.log('Camera zoom range:', capabilities.zoom);
+      }
+    }
+  }, [trackRef.current]);
+
+  useEffect(() => {
+  let cancelled = false;
+  
+  const handleZoom = async () => {
+    const track = trackRef.current;
+    if (!track) return;
+    
+    const capabilities = track.getCapabilities?.();
+    // @ts-ignore
+    if (!capabilities?.zoom) {
+      console.warn('Zoom not supported');
+      return;
+    }
+    
+    // Clamp scale to camera's min/max zoom capabilities
+    //@ts-ignore
+    const { min, max } = capabilities.zoom;
+    const clampedScale = Math.min(Math.max(scale, min), max);
+    
+    if (clampedScale !== scale) {
+      console.warn(`Scale ${scale} out of range [${min}, ${max}], clamped to ${clampedScale}`);
+    }
+    
+    try {
+      console.log(`Zooming to ${clampedScale} (range: ${min}-${max})`);
+      await track.applyConstraints({
+        // @ts-ignore
+        advanced: [{ zoom: clampedScale }]
+      });
+      
+      if (!cancelled) {
+        console.log("Zoom applied successfully");
+      }
+    } catch (error) {
+      if (!cancelled) {
+        console.error("Failed to apply zoom:", error);
+      }
+    }
+  };
+  
+  handleZoom();
+  
+  return () => {
+    cancelled = true;
+  };
+}, [scale]);
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -106,7 +176,7 @@ export const QRScanner: React.FC = () => {
     setIsSuccess(false)
     setError(null)
     toast.promise(
-      async () => {qrScanner?.start()},
+      async () => {qrScanner?.start(); getCamera()},
       {
         loading: "Đang khởi động camera",
         success: "Khởi động camera thành công",
@@ -138,7 +208,7 @@ export const QRScanner: React.FC = () => {
 
       if (lastDistance.current) {
         const zoomFactor = distance / lastDistance.current;
-        setScale((prev) => Math.min(Math.max(prev * zoomFactor, 1), 5)); // zoom range 1x–5x
+        setScale((prev) => Math.min(Math.max(prev * zoomFactor, 1), zoomRange?.max || 10)); // zoom range 1x to devide's maximum zoom range (or 10x for falling back)
       }
 
       lastDistance.current = distance;
@@ -178,10 +248,6 @@ export const QRScanner: React.FC = () => {
                 playsInline
                 muted
                 className="absolute top-0 left-0 w-full h-full object-cover"
-                style={{
-                  transform: `scale(${scale})`,
-                  transformOrigin: "center center",
-                }}
               />
 
               {/* Zoom indicator */}
