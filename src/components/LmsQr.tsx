@@ -24,19 +24,10 @@ export const QRScanner: React.FC = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-        // grab the video track from the stream
-        const videoTrack = stream.getVideoTracks()[0];
-
-        // now you can do things like apply constraints dynamically too
-        videoTrack.applyConstraints({
-          // track-specific constraints
-          // @ts-ignore
-          advanced: [{ exposureMode: "continuous", focusMode: "continuous" }],
-        });
       } catch (err) {
         console.error("Lỗi khi truy cập camera:", err);
       }
-    };
+  };
 
   useEffect(() => {
     if (!videoRef.current) return;
