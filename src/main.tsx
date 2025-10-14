@@ -6,13 +6,16 @@ import { registerSW } from 'virtual:pwa-register';
 import { Analytics } from "@vercel/analytics/react"
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorHandler.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+    <ErrorBoundary>
       <App />
       <Analytics />
       <Toaster position='top-center' />
+    </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>
 );

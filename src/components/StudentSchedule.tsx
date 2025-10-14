@@ -609,7 +609,7 @@ export const StudentSchedule: React.FC = () => {
                 value={weekInfo?.TotalRecord ?? 0}
                 icon={BookOpen}
                 color="blue"
-                description="Tiết học trong kì"
+                description="Tiết học còn lại trong kì"
               />
               
               {nextClass && (
@@ -618,7 +618,7 @@ export const StudentSchedule: React.FC = () => {
                   value={formatDate(nextClass.ThoiGianBD)}
                   icon={Clock}
                   color="green"
-                  description="Thời gian bắt đầu tiết học"
+                  description="Ngày có tiết học tiếp theo"
                 />
               )}
               
