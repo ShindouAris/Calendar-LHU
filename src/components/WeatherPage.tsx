@@ -7,6 +7,7 @@ import { ApiService } from '@/services/apiService';
 import type { HourForecast, WeatherForeCastAPIResponse, WeatherCurrentAPIResponse } from '@/types/weather';
 import { computeAQIFromPM } from '@/services/aqiService';
 import { get_warning } from '@/services/warning';
+import ResponsiveIframe from './ui/iframe';
 
 interface WeatherPageProps {
   onBackToSchedule?: () => void;
@@ -163,6 +164,13 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
               </Card>
             );
           })}
+          <ResponsiveIframe
+          className='lg:hidden'
+          src="https://embed.windy.com/embed.html?type=forecast&location=coordinates&detail=true&detailLat=10.954859&detailLon=106.7961&metricTemp=default&metricRain=default&metricWind=default"
+          aspectRatio={16/9}
+          allowFullScreen={false}
+          autoResize={true}
+          />
         </div>
       )}
     </div>
