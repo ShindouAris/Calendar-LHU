@@ -31,7 +31,6 @@ export default function ResponsiveIframe({
 }: ResponsiveIframeProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [intrinsicHeight, setIntrinsicHeight] = useState<number | null>(null);
 
   // compute padding-top % trick for aspect ratio container
@@ -75,25 +74,6 @@ export default function ResponsiveIframe({
       if (ro) ro.disconnect();
     };
   }, [src, autoResize]);
-
-  // Basic full-screen toggling (works with element.requestFullscreen)
-  const toggleFullscreen = async () => {
-    const el = containerRef.current;
-    if (!el) return;
-    try {
-      if (!document.fullscreenElement) {
-        // @ts-ignore
-        await el.requestFullscreen?.();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    } catch (err) {
-      // fail silently — fullscreen may be blocked
-      setIsFullscreen(Boolean(document.fullscreenElement));
-    }
-  };
 
   // handle postMessage resize requests (optional pattern: host page inside iframe can post { type: 'resize', height })
   useEffect(() => {
