@@ -183,10 +183,6 @@ export const QRScanner: React.FC = () => {
         error: "Không thể khởi động camera"
       }
     )
-  //   qrScanner?.start().then((_) => {
-  //     console.log("Đã khởi động hệ thống camscanner")
-  //     setIsScanning(true)
-  //   }).catch((error) => console.log("Không thể bắt đầu hệ thống quét qr: " + error));
   };
 
   const handleBack = () => {
