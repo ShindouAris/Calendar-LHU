@@ -105,7 +105,7 @@ export const StudentSchedule: React.FC = () => {
       try {
         const data = await ApiService.get_current_weather();
         setCurrentWeather(data);
-      } catch (e) {
+      } catch {
         // bỏ qua lỗi thời tiết để không ảnh hưởng trải nghiệm
       }
     };
@@ -264,7 +264,7 @@ export const StudentSchedule: React.FC = () => {
         // no exams
         setExams([]);
       }
-    } catch (e) {
+    } catch {
       try {
         const stale = await examCacheService.getStale(studentId);
         if (stale) {
@@ -537,6 +537,7 @@ export const StudentSchedule: React.FC = () => {
       toast.success('Đã xuất tệp ICS, Bạn có thể nhập vào Google/Apple Calendar.');
     } catch (e) {
       toast.error('Xuất ICS thất bại');
+      console.error(e)
     }
   };
 

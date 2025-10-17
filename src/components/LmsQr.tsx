@@ -8,6 +8,8 @@ import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs"
+import { FaRegQuestionCircle } from "react-icons/fa";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -17,6 +19,7 @@ export const QRScanner: React.FC = () => {
   const [scale, setScale] = useState<number>(1);
   const [error, setError] = useState<null | string>(null)
   const [success, setIsSuccess] = useState<boolean>(false)
+  const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
   const nav = useNavigate()
 
   const getCamera = async () => {
@@ -25,8 +28,7 @@ export const QRScanner: React.FC = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-        const current_track = stream.getVideoTracks()[0];
-        trackRef.current = current_track
+        trackRef.current = stream.getVideoTracks()[0];
       } catch (err) {
         console.error("Lỗi khi truy cập camera:", err);
       }
@@ -39,15 +41,15 @@ export const QRScanner: React.FC = () => {
     const track = trackRef.current;
     if (track) {
       const capabilities = track.getCapabilities?.();
-      // @ts-ignore
+     // @ts-expect-error Zoom can be unavailable on some devices
       if (capabilities?.zoom) {
         setZoomRange({
-          // @ts-ignore
+         // @ts-expect-error Zoom can be unavailable on some devices
           min: capabilities.zoom.min,
-          // @ts-ignore
+         // @ts-expect-error Zoom can be unavailable on some devices
           max: capabilities.zoom.max
         });
-        // @ts-ignore
+       // @ts-expect-error Zoom can be unavailable on some devices
         console.log('Camera zoom range:', capabilities.zoom);
       }
     }
@@ -61,14 +63,14 @@ export const QRScanner: React.FC = () => {
     if (!track) return;
     
     const capabilities = track.getCapabilities?.();
-    // @ts-ignore
+   // @ts-expect-error Zoom can be unavailable on some devices
     if (!capabilities?.zoom) {
       console.warn('Zoom not supported');
       return;
     }
     
     // Clamp scale to camera's min/max zoom capabilities
-    //@ts-ignore
+   // @ts-expect-error Zoom can be unavailable on some devices
     const { min, max } = capabilities.zoom;
     const clampedScale = Math.min(Math.max(scale, min), max);
     
@@ -79,7 +81,7 @@ export const QRScanner: React.FC = () => {
     try {
       console.log(`Zooming to ${clampedScale} (range: ${min}-${max})`);
       await track.applyConstraints({
-        // @ts-ignore
+       // @ts-expect-error Zoom can be unavailable on some devices
         advanced: [{ zoom: clampedScale }]
       });
       
@@ -93,7 +95,9 @@ export const QRScanner: React.FC = () => {
     }
   };
   
-  handleZoom();
+  handleZoom().then(() => {
+
+  });
   
   return () => {
     cancelled = true;
@@ -171,12 +175,12 @@ export const QRScanner: React.FC = () => {
       }})
   }, [scanned])
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setScanned("");
     setIsSuccess(false)
     setError(null)
-    toast.promise(
-      async () => {qrScanner?.start(); getCamera()},
+    await toast.promise(
+      async () => {qrScanner?.start(); await getCamera()},
       {
         loading: "Đang khởi động camera",
         success: "Khởi động camera thành công",
@@ -215,6 +219,11 @@ export const QRScanner: React.FC = () => {
     lastDistance.current = null;
   };
 
+  const handleDialog = () => {
+      setDialogTutorialOpen(!dialogTutorialOpen)
+      console.log(dialogTutorialOpen);
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-gray-900 select-none p-4">
       {/* App Bar */}
@@ -223,6 +232,7 @@ export const QRScanner: React.FC = () => {
           <div className="flex items-center gap-3">
             <QrCode className="w-6 h-6" />
             <h1 className="text-xl font-medium">Quét mã điểm danh</h1>
+            <FaRegQuestionCircle size={25} className="ml-auto" onClick={handleDialog} />
           </div>
         </div>
       </div>
@@ -237,7 +247,7 @@ export const QRScanner: React.FC = () => {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
-              {videoRef.current ? (<div><img src="/cibi.png"/></div>) : (<></>)}
+              {videoRef.current ? (<div><img alt={"IMAGE"} src="/cibi.png"/></div>) : (<></>)}
               <video
                 ref={videoRef}
                 autoPlay
@@ -353,6 +363,24 @@ export const QRScanner: React.FC = () => {
           <span className="text-sm font-bold">1x</span>
         </motion.button>
       )}
+        <Dialog open={dialogTutorialOpen} onOpenChange={setDialogTutorialOpen}>
+            <DialogContent className="max-w-3xl p-4">
+                <DialogHeader>
+                    <DialogTitle>Hướng dẫn sử dụng hệ thống điểm danh</DialogTitle>
+                </DialogHeader>
+                <DialogDescription className="flex justify-center">
+                    <video
+                        src="/tut.mp4"
+                        autoPlay
+                        muted
+                        loop
+                        controls
+                        playsInline
+                        className="rounded-lg w-full max-h-[70vh] object-contain"
+                    />
+                </DialogDescription>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 };
