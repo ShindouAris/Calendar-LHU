@@ -69,7 +69,7 @@ const getStatusText = (status: number, is_cancelled: boolean) => {
   }
 };
 
-export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentName, exams = [], examDurationMinutes = 120, includeCancelled = false }) => {
+export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentName, exams = [], examDurationMinutes = 120, includeCancelled = true }) => {
   const [screenSize, setScreenSize] = useState(() => {
     const width = window.innerWidth;
     if (width < 640) return 'mobile';

@@ -197,9 +197,9 @@ export const StudentSchedule: React.FC = () => {
     : schedules.filter(schedule => isWithinNext7Days(schedule.ThoiGianBD));
 
   // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
-  const activeSchedules = baseSchedules.filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
+  // const activeSchedules = baseSchedules.filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
 
-  const displaySchedules = activeSchedules.filter(s => {
+  const displaySchedules = baseSchedules.filter(s => {
     if (showEnded) return true;
     const status = getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT);
     return status !== 3; // ẩn các lớp đã kết thúc khi toggle OFF

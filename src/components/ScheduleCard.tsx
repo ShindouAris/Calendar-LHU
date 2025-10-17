@@ -3,19 +3,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { 
-  Clock, 
-  MapPin, 
-  User, 
-  BookOpen, 
-  Building, 
-  ExternalLink,
-  Video,
-  Calendar,
-  AlertCircle,
-  CheckCircle2,
-  Clock3,
-  AlertTriangle
+import {
+    Clock,
+    MapPin,
+    User,
+    BookOpen,
+    Building,
+    ExternalLink,
+    Video,
+    Calendar,
+    AlertCircle,
+    CheckCircle2,
+    Clock3,
+    AlertTriangle,
+    CircleSlash
 } from 'lucide-react';
 import { ScheduleItem } from '@/types/schedule';
 import { formatTime, formatDate, getDayName, getRealtimeStatus, StartAfter } from '@/utils/dateUtils';
@@ -25,6 +26,8 @@ import {
   detectDuplicateSchedules, 
   getDuplicateGroupStatus 
 } from '@/utils/scheduleUtils';
+import FuzzyText from "@/components/FuzzyText.tsx";
+import { motion } from "framer-motion";
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
@@ -33,7 +36,15 @@ interface ScheduleCardProps {
 }
 
 const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = false, allSchedules = [] }) => {
-  const getStatusConfig = (status: number) => {
+  const getStatusConfig = (status: number, isCanceled: boolean) => {
+    if (isCanceled) {
+        return {
+            color: 'bg-gradient-to-r from-red-500 to-red-600',
+            text: 'Bị hủy',
+            icon: CircleSlash,
+            textColor: 'text-green-700 dark:text-green-300'
+        };
+    }
     switch (status) {
       case 1:
         return {
@@ -66,6 +77,18 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
     }
   };
 
+  const getColor = (isCanceled: boolean, isNext: boolean): string => {
+      if (isNext && !isCanceled) {
+          return 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 shadow-blue-200 dark:shadow-blue-700'
+      }
+
+      if (isCanceled) {
+          return 'bg-gradient-to-r from-gray-50 via-indigo-50 to-gray-50 dark:from-gray-700 dark:via-indigo-800 dark:to-gray-900 shadow-red-200 dark:shadow-red-700'
+      }
+
+      return 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-800 dark:via-red-800 dark:to-pink-800 shadow-yellow-200 dark:shadow-yellow-700'
+  }
+
   const classStatus = (status: number) => {
     switch (status) {
       case 0: 
@@ -89,7 +112,8 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   const effectiveStatus = realtimeStatus !== undefined && realtimeStatus !== null
     ? realtimeStatus
     : schedule.TinhTrang;
-  const statusConfig = getStatusConfig(effectiveStatus);
+  const canceled = schedule.TinhTrang !== 0
+  const statusConfig = getStatusConfig(effectiveStatus, canceled);
   const StatusIcon = statusConfig.icon;
 
   const getStudyPlace = (schedule: ScheduleItem) => {
@@ -207,10 +231,8 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   }, [schedule.ThoiGianBD])
 
   return (
-    <Card className={`group transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
-      isNext 
-        ? 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 shadow-blue-200 dark:shadow-blue-700' 
-        : 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-800 dark:via-red-800 dark:to-pink-800'
+    <Card className={`group relative transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
+      getColor(canceled, isNext)
     }`}>
       {/* Next Class Banner */}
       {isNext && (
@@ -221,253 +243,307 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
           </div>
         </div>
       )}
-      
-      <CardContent className="p-5 sm:p-6 lg:p-8">
-        {/* Header Section */}
-        <div className="flex items-start justify-between mb-5 sm:mb-6 gap-3">
-          <div className="flex-1 min-w-0">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-800 to-indigo-600 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-violet-400 group-hover:dark:from-blue-300 group-hover:dark:to-violet-300 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
-                    {schedule.TenMonHoc}
-                  </h3>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="text-sm">{schedule.TenMonHoc}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-              <div className="flex items-center gap-2 bg-pink-200 dark:bg-blue-950/50 px-2.5 sm:px-3 py-1 rounded-full">
-                <Calendar className="h-4 w-4 text-blue-500" />
-                <span className="font-medium">{getDayName(schedule.Thu)}</span>
-              </div>
-              <span className="hidden sm:inline text-gray-400">•</span>
-              <span className="font-medium">{formatDate(schedule.ThoiGianBD)}</span>
-              {/* Badges: TinhTrang, CalenType, Type */}
-              {classStatus(schedule.TinhTrang) !== "" && (
-                <Badge className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
-                  {classStatus(schedule.TinhTrang)}
+
+        {canceled && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 bg-gradient-to-br
+                    from-red-100/40 via-rose-200/40 to-pink-100/40 dark:from-red-950/40 dark:via-rose-900/40 dark:to-pink-950/40">
+                <h2 className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400 mb-3">
+                    <FuzzyText baseIntensity={0.3} hoverIntensity={0.7} enableHover={true}>Tiết báo nghỉ</FuzzyText>
+                </h2>
+                <motion.p
+                    className="mt-4 text-gray-400 lg:text-2xl sm:text-sm tracking-wider"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.2 }}
+                >
+                    Môn học <span className="font-semibold">{schedule.TenMonHoc}</span> đã báo nghỉ
+                </motion.p>
+            </div>
+        )}
+            <CardContent className={`p-5 sm:p-6 lg:p-8 transition-all duration-500 ${
+                canceled ? 'blur-sm brightness-75 pointer-events-none select-none' : ''
+            }`}>
+            {/* Header Section */}
+            <div className="flex items-start justify-between mb-5 sm:mb-6 gap-3">
+                <div className="flex-1 min-w-0">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-800 to-indigo-600 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-violet-400 group-hover:dark:from-blue-300 group-hover:dark:to-violet-300 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
+                                    {schedule.TenMonHoc}
+                                </h3>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                                <p className="text-sm">{schedule.TenMonHoc}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                    <div
+                        className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                        <div
+                            className="flex items-center gap-2 bg-pink-200 dark:bg-blue-950/50 px-2.5 sm:px-3 py-1 rounded-full">
+                            <Calendar className="h-4 w-4 text-blue-500"/>
+                            <span className="font-medium">{getDayName(schedule.Thu)}</span>
+                        </div>
+                        <span className="hidden sm:inline text-gray-400">•</span>
+                        <span className="font-medium">{formatDate(schedule.ThoiGianBD)}</span>
+                        {/* Badges: TinhTrang, CalenType, Type */}
+                        {classStatus(schedule.TinhTrang) !== "" && (
+                            <Badge
+                                className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
+                                {classStatus(schedule.TinhTrang)}
+                            </Badge>
+                        )}
+                        {duplicateInfo.isDuplicate && (
+                            <Badge
+                                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white px-2.5 py-1 rounded-full shadow">
+                                {duplicateInfo.duplicateSchedules?.length ? duplicateInfo.duplicateSchedules.length - 1 : 0} lịch
+                                trùng
+                            </Badge>
+                        )}
+                        {schedule.CalenType === 2 && (
+                            <Badge
+                                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-1 rounded-full shadow">
+                                Thi
+                            </Badge>
+                        )}
+                        <Badge
+                            className="bg-gradient-to-r from-slate-200 to-slate-300 text-slate-900 dark:from-slate-700 dark:to-slate-600 dark:text-white px-2.5 py-1 rounded-full shadow">
+                            {schedule.Type === 0 ? 'Lý thuyết' : 'Thực hành'}
+                        </Badge>
+                    </div>
+                </div>
+
+                <Badge
+                    className={`${statusConfig.color} text-white px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium shadow-lg whitespace-nowrap`}
+                >
+                    <StatusIcon className="h-4 w-4 mr-2"/>
+                    {statusConfig.text}
                 </Badge>
-              )}
-              {duplicateInfo.isDuplicate && (
-                <Badge className="bg-gradient-to-r from-orange-500 to-amber-600 text-white px-2.5 py-1 rounded-full shadow">
-                  {duplicateInfo.duplicateSchedules?.length ? duplicateInfo.duplicateSchedules.length - 1 : 0} lịch trùng
-                </Badge>
-              )}
-              {schedule.CalenType === 2 && (
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-1 rounded-full shadow">
-                  Thi
-                </Badge>
-              )}
-              <Badge className="bg-gradient-to-r from-slate-200 to-slate-300 text-slate-900 dark:from-slate-700 dark:to-slate-600 dark:text-white px-2.5 py-1 rounded-full shadow">
-                {schedule.Type === 0 ? 'Lý thuyết' : 'Thực hành'}
-              </Badge>
             </div>
-          </div>
-          
-          <Badge 
-            className={`${statusConfig.color} text-white px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium shadow-lg whitespace-nowrap`}
-          >
-            <StatusIcon className="h-4 w-4 mr-2" />
-            {statusConfig.text}
-          </Badge>
-        </div>
 
-        {/* Schedule Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-5 sm:mb-6">
-          {/* Left Column */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời gian</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
-                  {formatTime(schedule.ThoiGianBD)} - {formatTime(schedule.ThoiGianKT)}
+            {/* Schedule Details Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-5 sm:mb-6">
+                {/* Left Column */}
+                <div className="space-y-4">
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời gian</div>
+                            <div
+                                className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                {formatTime(schedule.ThoiGianBD)} - {formatTime(schedule.ThoiGianKT)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Phòng học</div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div
+                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            {schedule.TenPhong}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                        <p className="text-sm">{schedule.TenPhong}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
+
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                            <User className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Giảng viên</div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div
+                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            {schedule.GiaoVien}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                        <p className="text-sm">{schedule.GiaoVien}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center">
-                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Phòng học</div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
-                        {schedule.TenPhong}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-sm">{schedule.TenPhong}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
+                {/* Right Column */}
+                <div className="space-y-4">
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
+                            <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1 overflow-hidden">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div ref={groupNameRef}
+                                             className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
+                                            {schedule.TenNhom}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                        <p className="text-sm">{schedule.TenNhom}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
 
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Giảng viên</div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
-                        {schedule.GiaoVien}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-sm">{schedule.GiaoVien}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-          </div>
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center">
+                            <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cơ sở</div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div
+                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            {getStudyPlace(schedule)}
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs">
+                                        <p className="text-sm">{getStudyPlace(schedule)}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    </div>
 
-          {/* Right Column */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
-                <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div ref={groupNameRef} className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
-                        {schedule.TenNhom}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-sm">{schedule.TenNhom}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
+                    <div
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        <div
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-slate-500 to-gray-600 rounded-full flex items-center justify-center">
+                            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời lượng tiết</div>
+                            <div
+                                className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                {minutesToHourMinute(schedule.SoTietBuoi)}
+                            </div>
+                        </div>
+                    </div>
+                    {forecastHour && (
+                        <div
+                            className="flex items-center gap-3 p-3 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                            <div
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-sky-500 flex items-center justify-center overflow-hidden">
+                                <img
+                                    src={
+                                        forecastHour?.condition?.icon
+                                            ? (forecastHour.condition.icon.startsWith('http')
+                                                ? forecastHour.condition.icon
+                                                : `https:${forecastHour.condition.icon}`)
+                                            : '/favicon.svg'
+                                    }
+                                    alt="weather"
+                                    className="w-6 h-6"
+                                />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến
+                                </div>
+                                <div
+                                    className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                    {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center">
-                <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cơ sở</div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
-                        {getStudyPlace(schedule)}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs">
-                      <p className="text-sm">{getStudyPlace(schedule)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-slate-500 to-gray-600 rounded-full flex items-center justify-center">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời lượng tiết</div>
-                <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
-                  {minutesToHourMinute(schedule.SoTietBuoi)}
+                    {/* Duplicate Schedule Info */}
+                    {duplicateInfo.isDuplicate && duplicateInfo.duplicateSchedules && (
+                        <div
+                            className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px] border border-orange-200 dark:border-orange-700">
+                            <div
+                                className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center">
+                                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs sm:text-sm text-orange-700 dark:text-orange-300 font-semibold">
+                                    Cảnh báo: Lịch trùng thời gian
+                                </div>
+                                <div
+                                    className="text-sm sm:text-base font-semibold text-orange-900 dark:text-orange-100">
+                                    Có {duplicateInfo.duplicateSchedules.length - 1} lịch cùng thời gian
+                                </div>
+                                <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                                    {duplicateInfo.status?.statusText && `Trạng thái: ${duplicateInfo.status.statusText}`}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
-              </div>
             </div>
-            {forecastHour && (
-              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-sky-500 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={
-                      forecastHour?.condition?.icon
-                        ? (forecastHour.condition.icon.startsWith('http')
-                            ? forecastHour.condition.icon
-                            : `https:${forecastHour.condition.icon}`)
-                        : '/favicon.svg'
-                    }
-                    alt="weather"
-                    className="w-6 h-6"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến</div>
-                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
-                    {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Duplicate Schedule Info */}
-            {duplicateInfo.isDuplicate && duplicateInfo.duplicateSchedules && (
-              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px] border border-orange-200 dark:border-orange-700">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-sm text-orange-700 dark:text-orange-300 font-semibold">
-                    Cảnh báo: Lịch trùng thời gian
-                  </div>
-                  <div className="text-sm sm:text-base font-semibold text-orange-900 dark:text-orange-100">
-                    Có {duplicateInfo.duplicateSchedules.length - 1} lịch cùng thời gian
-                  </div>
-                  <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                    {duplicateInfo.status?.statusText && `Trạng thái: ${duplicateInfo.status.statusText}`}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 pt-5 sm:pt-6 border-t border-gray-100 dark:border-gray-700">
-          {schedule.GoogleMap && schedule.GoogleMap !== null && (
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => window.open(schedule.GoogleMap, '_blank')}
-              className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group w-full"
-            >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <span>Xem bản đồ</span>
-              <ExternalLink className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          )}
+            {/* Action Buttons */}
+            <div
+                className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 pt-5 sm:pt-6 border-t border-gray-100 dark:border-gray-700">
+                {schedule.GoogleMap && (
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => window.open(schedule.GoogleMap, '_blank')}
+                        className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group w-full"
+                    >
+                        <div
+                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400"/>
+                        </div>
+                        <span>Xem bản đồ</span>
+                        <ExternalLink className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform"/>
+                    </Button>
+                )}
 
-          {schedule.OnlineLink && schedule.OnlineLink !== null && (
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => window.open(schedule.OnlineLink, '_blank')}
-              className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full"
-            >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Video className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <span>Tham gia online</span>
-              <ExternalLink className="h-4 w-4 text-green-500 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          )}
-        </div>
-      </CardContent>
+                {schedule.OnlineLink && (
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => window.open(schedule.OnlineLink, '_blank')}
+                        className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full"
+                    >
+                        <div
+                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Video className="h-4 w-4 text-green-600 dark:text-green-400"/>
+                        </div>
+                        <span>Tham gia online</span>
+                        <ExternalLink
+                            className="h-4 w-4 text-green-500 group-hover:translate-x-1 transition-transform"/>
+                    </Button>
+                )}
+            </div>
+        </CardContent>
     </Card>
   );
 };
