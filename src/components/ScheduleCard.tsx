@@ -120,6 +120,9 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
     if (schedule.TenCoSo.toLocaleLowerCase().includes("khác")) {
       return "Khác";
     }
+    if (schedule.TenCoSo.toLocaleLowerCase().includes("online") && schedule.TenPhong.toLowerCase().includes("online learn")) {
+        return "Học Trên Learn"
+    }
     if (schedule.TenCoSo.toLocaleLowerCase().includes("online")) {
       return "Học Online Zoom";
     }
@@ -530,12 +533,18 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     <Button
                         size="lg"
                         variant="outline"
-                        onClick={() => window.open(schedule.OnlineLink, '_blank')}
+                        onClick={() => {
+                            if (getStudyPlace(schedule) === "Học Trên Learn") {
+                                window.open("https://learn.lhu.edu.vn", "_blank");
+                            } else {
+                            window.open(schedule.OnlineLink, '_blank')
+                            }
+                        }}
                         className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full"
                     >
                         <div
                             className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Video className="h-4 w-4 text-green-600 dark:text-green-400"/>
+                            {getStudyPlace(schedule) === "Học Trên Learn" ? (<BookOpen className="h-4 w-4 text-green-600 dark:text-green-400" />) : (<Video className="h-4 w-4 text-green-600 dark:text-green-400"/>) }
                         </div>
                         <span>Tham gia online</span>
                         <ExternalLink
