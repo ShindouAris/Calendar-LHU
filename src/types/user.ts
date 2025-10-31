@@ -54,6 +54,7 @@ export interface MarkApiResponse {
     StudentImage: string;
     DiemTB: number;
     data: MonHocAPI[];
+    Message?: string;
 }
 
 export const AUTH_STORAGE_KEY = 'auth_user';
