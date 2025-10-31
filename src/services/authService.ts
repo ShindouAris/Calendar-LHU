@@ -117,6 +117,12 @@ export const authService = {
         if (response.status === 401 && response.statusText === "Token not found") {
           throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
         }
+        if (response.status === 400 && (await response.json()).Message === "Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học") {
+          throw new Error("Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học")
+        }
+        if (response.status === 400 && (await response.json()).Message === "Bạn không có quyền xem điểm") {
+          throw new Error("Bạn không có quyền xem điểm")
+        }
         throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
       }
       const data: MarkApiResponse = await response.json()
