@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, GraduationCap, ArrowLeft } from 'lucide-react';
-// import { authService } from '@/services/authService';
-import { AuthStorage, type HocKyGroup, type MonHoc } from '@/types/user';
-// import toast from 'react-hot-toast';
+import { authService } from '@/services/authService';
+import {AuthStorage, MarkApiResponse, type MonHocAPI, type DiemThanhPhanItem} from '@/types/user';
+import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
+import { Input } from '@/components/ui/input';
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -14,10 +15,11 @@ interface MarkPageProps {
 export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [marks, setMarks] = useState<HocKyGroup | null>(null);
-  const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
+  const [marks, setMarks] = useState<MarkApiResponse | null>(null);
+  const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
   const [tinchi, setTinchi] = useState<number>(0)
-  const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
+  const [studentIdQuery, setStudentIdQuery] = useState<string>("")
+  // const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
   const user = AuthStorage.getUser();
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
@@ -33,62 +35,105 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   };
 
   useEffect(() => {
-    // const load = async () => {
-    //   setLoading(true);
-    //   setError(null);
-    //   try {
-    //     const data = await authService.getMark();
-    //     if (data?.reason) {
-    //       setError(data.reason)
-    //     }
-    //     setMarks(data ?? null);
-    //   } catch (e) {
-    //     if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
-    //       toast.error(e.message)
-    //       AuthStorage.deleteUser()
-    //     } else {
-    //       setError(e instanceof Error ? e.message : 'Không thể tải điểm');
-    //     }
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+          const user = AuthStorage.getUser()
+          if (!user?.UserID) {
+            throw new Error("Chưa đăng nhập");
+          }
+        const data = await authService.getMark(user.UserID);
+        setMarks(data ?? null);
+      } catch (e) {
+        if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
+          toast.error(e.message)
+          AuthStorage.deleteUser()
+        } else {
+          setError(e instanceof Error ? e.message : 'Không thể tải điểm');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setIsMaintenance(true);
-    setError("Đang bảo trì trang mark");
-    setLoading(false);
-    setMarks(null)
-
-    // load();
+    load();
   }, [user?.UserID]);
 
-  useEffect(() => {
-    if (!marks || !marks.semesters) {
-      setSelectedSemester(null);
-      return;
+  const getUserMark = async (uid: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (!uid) {
+        throw new Error("Mã sinh viên không hợp lệ");
+      }
+      const data = await authService.getMark(uid);
+      setMarks(data ?? null);
+    } catch (e) {
+      if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
+        toast.error(e.message)
+      } else {
+        setError(e instanceof Error ? e.message : 'Không thể tải điểm');
+      }
+    } finally {
+      setLoading(false);
     }
-    const keys = Object.keys(marks.semesters).sort((a, b) => Number(a) - Number(b));
-    if (keys.length > 0) {
-      setSelectedSemester((current) => (current && keys.includes(current) ? current : keys[0]));
-    } else {
-      setSelectedSemester(null);
-    }
+  };
+
+  const semesters = useMemo(() => {
+    if (!marks?.data) return {} as Record<number, MonHocAPI[]>;
+    return marks.data.reduce((acc: Record<number, MonHocAPI[]>, item) => {
+      const hk = Number(item.HocKy || 0);
+      if (!acc[hk]) acc[hk] = [];
+      acc[hk].push(item);
+      return acc;
+    }, {} as Record<number, MonHocAPI[]>);
   }, [marks]);
 
   useEffect(() => {
-    if (!marks || !marks.semesters) {
-      setTinchi(0)
+    const keys = Object.keys(semesters).map((k) => Number(k)).sort((a, b) => a - b);
+    if (keys.length > 0) {
+      setSelectedSemester((current) => (current !== null && keys.includes(current) ? current : keys[0]));
+    } else {
+      setSelectedSemester(null);
     }
-      const hocki = marks?.semesters[selectedSemester || 1]
+  }, [semesters]);
 
-      if (hocki) {
-        let tin_chi = 0
-        hocki.forEach((monhoc, _) => {
-          tin_chi += Number(monhoc.he_so)
-        })
-        setTinchi(tin_chi)
-      }
-    }, [selectedSemester])
+  useEffect(() => {
+    if (!selectedSemester) {
+      setTinchi(0);
+      return;
+    }
+    const hocki = semesters[selectedSemester] || [];
+    const tin_chi = hocki.reduce((sum, mh) => sum + Number(mh.HeSo || 0), 0);
+    setTinchi(tin_chi);
+  }, [selectedSemester, semesters])
+
+  const totalAccumulatedCredits = useMemo(() => {
+    if (!marks?.data) return 0;
+    return marks.data.reduce((sum, mh) => sum + Number(mh.HeSo || 0), 0);
+  }, [marks]);
+
+  const renderThanhPhan = (raw: string | null) => {
+    if (!raw) return '—';
+    try {
+      const items = JSON.parse(raw) as DiemThanhPhanItem[];
+      if (!Array.isArray(items) || items.length === 0) return '—';
+      return (
+        <div className="space-y-1">
+          {items.map((it) => (
+            <div key={it.STT} className="flex items-center justify-between gap-2">
+              <span className="truncate">{it.HinhThuc}</span>
+              <span className="ml-auto font-medium">{formatScore(it.Diem)}</span>
+              <span className="text-gray-500">({formatScore(it.ptDiem, 0)}%)</span>
+            </div>
+          ))}
+        </div>
+      );
+    } catch {
+      return raw;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -97,17 +142,38 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           <GraduationCap className="h-6 w-6" /> Kết quả học tập
         </h2>
         <div className="flex items-center gap-3 w-full sm:w-auto">
+          <form
+            className="flex w-full sm:w-auto items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!loading && studentIdQuery.trim()) {
+                getUserMark(studentIdQuery.trim());
+              }
+            }}
+          >
+            <Input
+              placeholder="Nhập mã SV..."
+              className="w-full sm:w-56"
+              value={studentIdQuery}
+              onChange={(e) => setStudentIdQuery(e.target.value)}
+              disabled={loading}
+            />
+            <Button type="submit" disabled={loading || !studentIdQuery.trim()} className="shrink-0">
+              Xem
+            </Button>
+          </form>
           {!loading && !error && marks && (
             <select
               className="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={selectedSemester ?? ''}
-              onChange={(e) => setSelectedSemester(e.target.value)}
+              onChange={(e) => setSelectedSemester(Number(e.target.value))}
             {
               ...(undefined as any)
             }
             >
-              {Object.keys(marks.semesters)
-                .sort((a, b) => Number(a) - Number(b))
+              {Object.keys(semesters)
+                .map((k) => Number(k))
+                .sort((a, b) => a - b)
                 .map((hk) => (
                   <option key={hk} value={hk}>
                    Học kỳ {hk}
@@ -129,67 +195,109 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
         </Card>
       )}
 
-      {error || is_maintenance && (
+      {error && (
         <Card className="border-0 shadow-lg">
           <CardContent className="py-8 text-center text-red-600 dark:text-red-400">{error}</CardContent>
         </Card>
       )}
 
-      {!loading && !error && marks && selectedSemester && (
-        <div className="space-y-6">
-          {(() => {
-            const hocKy = selectedSemester;
-            const monHocs = marks.semesters[hocKy] ?? [];
-            return (
-              <Card key={hocKy} className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-blue-600" /> Học kỳ {hocKy}
-                    <PiChalkboardSimpleDuotone className="h-5 w-5 text-green-600" /> Số tín chỉ trong kì {tinchi}
-                    <PiDiceThreeDuotone className="h-5 w-5 text-yellow-600" /> Số tín chỉ tích luỹ {marks.tin_chi_tich_luy}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[720px] border-collapse text-sm sm:text-base table-auto">
-                      <thead>
-                        <tr className="bg-gray-100 dark:bg-gray-700 text-center">
-                          <th className="px-4 py-2">Mã MH</th>
-                          <th className="px-4 py-2">Tên môn học</th>
-                          <th className="px-4 py-2">Tín chỉ</th>
-                          <th className="px-4 py-2">Điểm TP</th>
-                          <th className="px-4 py-2">Điểm TB</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Array.isArray(monHocs) && monHocs.length > 0 ? (
-                          monHocs.map((mh: MonHoc, idx: number) => (
-                            <tr
-                              key={mh.ma_mon_hoc || `${hocKy}-${idx}`}
-                              className="border-b border-gray-200 dark:border-gray-700"
-                            >
-                              <td className="px-4 py-2 font-mono break-words">{safeText(mh.ma_mon_hoc)}</td>
-                              <td className="px-4 py-2 break-words">{safeText(mh.ten_mon_hoc)}</td>
-                              <td className="px-4 py-2">{formatScore(mh.he_so, 0)}</td>
-                              <td className="px-4 py-2">{formatScore(mh.diem_thanh_phan)}</td>
-                              <td className="px-4 py-2 font-semibold">{formatScore(mh.diem_trung_binh)}</td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan={5} className="px-4 py-4 text-center text-gray-500">
-                              Không có dữ liệu môn học cho học kỳ này
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+      {!loading && !error && marks && (
+        <>
+          <Card className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+            <CardContent className="py-6">
+              <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                <img
+                  src={marks.StudentImage}
+                  alt={marks.HoTen}
+                  className="w-28 h-28 rounded-md object-cover border border-gray-200 dark:border-gray-700"
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                  <div>
+                    <div className="text-sm text-gray-500">Họ tên</div>
+                    <div className="font-medium">{marks.HoTen}</div>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })()}
-        </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Mã SV</div>
+                    <div className="font-medium">{marks.StudentID}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Lớp</div>
+                    <div className="font-medium">{marks.LopID}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Ngày sinh</div>
+                    <div className="font-medium">{marks.NgaySinh}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Tình trạng</div>
+                    <div className="font-medium">{marks.TinhTrang}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Điểm TB</div>
+                    <div className="font-medium">{formatScore(marks.DiemTB)}</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {selectedSemester !== null && (
+            <div className="space-y-6">
+              {(() => {
+                const hocKy = selectedSemester as number;
+                const monHocs = semesters[hocKy] ?? [];
+                return (
+                  <Card key={hocKy} className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5 text-blue-600" /> Học kỳ {hocKy}
+                        <PiChalkboardSimpleDuotone className="h-5 w-5 text-green-600" /> Số tín chỉ trong kì {tinchi}
+                        <PiDiceThreeDuotone className="h-5 w-5 text-yellow-600" /> Số tín chỉ tích luỹ {totalAccumulatedCredits}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[720px] border-collapse text-sm sm:text-base table-auto">
+                          <thead>
+                            <tr className="bg-gray-100 dark:bg-gray-700 text-center">
+                              <th className="px-4 py-2">Mã MH</th>
+                              <th className="px-4 py-2">Tên môn học</th>
+                              <th className="px-4 py-2">Tín chỉ</th>
+                              <th className="px-4 py-2">Điểm TP</th>
+                              <th className="px-4 py-2">Điểm TB</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Array.isArray(monHocs) && monHocs.length > 0 ? (
+                              monHocs.map((mh: MonHocAPI, idx: number) => (
+                                <tr
+                                  key={mh.MonHocID || `${hocKy}-${idx}`}
+                                  className="border-b border-gray-200 dark:border-gray-700"
+                                >
+                                  <td className="px-4 py-2 font-mono break-words">{String(mh.MonHocID)}</td>
+                                  <td className="px-4 py-2 break-words">{safeText(mh.TenMH)}</td>
+                                  <td className="px-4 py-2">{formatScore(mh.HeSo, 0)}</td>
+                                  <td className="px-4 py-2">{renderThanhPhan(mh.DiemThanhPhan)}</td>
+                                  <td className="px-4 py-2 font-semibold">{formatScore(mh.DiemTBMon)}</td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={5} className="px-4 py-4 text-center text-gray-500">
+                                  Không có dữ liệu môn học cho học kỳ này
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+            </div>
+          )}
+        </>
       )}
 
       {!loading && !error && !marks && (

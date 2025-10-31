@@ -21,20 +21,39 @@ export interface AuthState {
   user: UserResponse | null;
 }
 
-export interface MonHoc {
-  ma_mon_hoc: string;
-  ten_mon_hoc: string;
-  he_so: string;
-  diem_thanh_phan: string;
-  diem_trung_binh: string;
+// New API response
+export interface DiemThanhPhanItem {
+    STT: number;
+    HinhThuc: string;
+    ptDiem: number;
+    Diem: number;
 }
 
-export interface HocKyGroup {
-  semesters: {
-      [hocKy: string]: MonHoc[];
-  };
-  tin_chi_tich_luy: number;
-  reason?: string;
+export interface MonHocAPI {
+    HocKy: number;
+    KyThiID: number;
+    MonHocID: number;
+    TenMH: string;
+    HeSo: number; // Tín chỉ
+    DiemTBMon: number;
+    SoLanThi: number;
+    Dau: boolean;
+    KyThiThayThe: number;
+    DangKyThiLai: number;
+    UpdateTime: string;
+    DiemThanhPhan: string | null;
+}
+
+export interface MarkApiResponse {
+    StudentID: string;
+    HoTen: string;
+    LopID: string;
+    NgaySinh: string;
+    TinhTrangID: number;
+    TinhTrang: string;
+    StudentImage: string;
+    DiemTB: number;
+    data: MonHocAPI[];
 }
 
 export const AUTH_STORAGE_KEY = 'auth_user';

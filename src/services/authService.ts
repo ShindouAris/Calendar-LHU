@@ -1,6 +1,7 @@
-import { AuthStorage, HocKyGroup, UserResponse } from '@/types/user';
+import {AuthStorage, MarkApiResponse, UserResponse} from '@/types/user';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const SCHOOL_TAPI = import.meta.env.VITE_LHU_TAPI;
 
 export interface LoginRequestBody {
   DeviceInfo: string;
@@ -99,35 +100,32 @@ export const authService = {
     localStorage.removeItem("access_token")
     return "Đăng xuất thành công" 
   },
-  async getMark(): Promise<HocKyGroup | undefined> {
+  async getMark(uid: string): Promise<MarkApiResponse | undefined> {
     const access_token = localStorage.getItem("access_token")
     if (!access_token) {
       throw new Error("Hãy đăng nhập để xem điểm của bạn")
     }
     try {
-      const response = await fetch(`${API_URL}/mark`, {
+      const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_GetBangDiem?studentid=${uid}`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          authorization: access_token
         },
-        body: JSON.stringify({
-          accessToken: access_token
-        })
       })
       if (!response.ok) {
+        if (response.status === 401 && response.statusText === "Token not found") {
+          throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
+        }
         throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
       }
-      const data: HocKyGroup = await response.json()
-      if (!data.semesters || Object.keys(data.semesters).length === 0 && !data.reason) {
-        throw new Error("Phiên đăng nhập không hợp lệ!")
+      const data: MarkApiResponse = await response.json()
+      if (!data.data || Object.keys(data.data).length === 0) {
+        throw new Error("Không tìm thấy điểm của mã sinh viên này")
       }
       return data
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message)
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 };
