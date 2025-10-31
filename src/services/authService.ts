@@ -107,7 +107,7 @@ export const authService = {
     }
     try {
       const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_GetBangDiem?studentid=${uid}`, {
-        method: "POST",
+        method: "GET",
         headers: {
           'Content-Type': 'application/json',
           authorization: access_token
