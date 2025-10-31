@@ -110,7 +110,7 @@ export const authService = {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',
-          authorization: access_token
+          authorization: `Bearer ${access_token}`
         },
       })
       if (!response.ok) {
