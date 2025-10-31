@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, GraduationCap, ArrowLeft } from 'lucide-react';
-import { authService } from '@/services/authService';
+// import { authService } from '@/services/authService';
 import { AuthStorage, type HocKyGroup, type MonHoc } from '@/types/user';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
 
 interface MarkPageProps {
@@ -17,6 +17,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [marks, setMarks] = useState<HocKyGroup | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<string | null>(null);
   const [tinchi, setTinchi] = useState<number>(0)
+  const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
   const user = AuthStorage.getUser();
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
@@ -32,27 +33,33 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   };
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await authService.getMark();
-        if (data?.reason) {
-          setError(data.reason)
-        }
-        setMarks(data ?? null);
-      } catch (e) {
-        if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
-          toast.error(e.message)
-          AuthStorage.deleteUser()
-        } else {
-          setError(e instanceof Error ? e.message : 'Không thể tải điểm');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    // const load = async () => {
+    //   setLoading(true);
+    //   setError(null);
+    //   try {
+    //     const data = await authService.getMark();
+    //     if (data?.reason) {
+    //       setError(data.reason)
+    //     }
+    //     setMarks(data ?? null);
+    //   } catch (e) {
+    //     if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
+    //       toast.error(e.message)
+    //       AuthStorage.deleteUser()
+    //     } else {
+    //       setError(e instanceof Error ? e.message : 'Không thể tải điểm');
+    //     }
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+
+    setIsMaintenance(true);
+    setError("Đang bảo trì trang mark");
+    setLoading(false);
+    setMarks(null)
+
+    // load();
   }, [user?.UserID]);
 
   useEffect(() => {
@@ -122,9 +129,9 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
         </Card>
       )}
 
-      {error && (
+      {error || is_maintenance && (
         <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-red-600 dark:text-red-400" dangerouslySetInnerHTML={{__html: error}}></CardContent>
+          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">{error}</CardContent>
         </Card>
       )}
 
