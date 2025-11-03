@@ -100,13 +100,13 @@ export const authService = {
     localStorage.removeItem("access_token")
     return "Đăng xuất thành công" 
   },
-  async getMark(uid: string): Promise<MarkApiResponse | undefined> {
+  async getMark(): Promise<MarkApiResponse | undefined> {
     const access_token = localStorage.getItem("access_token")
     if (!access_token) {
       throw new Error("Hãy đăng nhập để xem điểm của bạn")
     }
     try {
-      const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_GetBangDiem?studentid=${uid}`, {
+      const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_GetBangDiem`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json',

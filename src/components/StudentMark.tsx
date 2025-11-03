@@ -6,7 +6,6 @@ import { authService } from '@/services/authService';
 import {AuthStorage, MarkApiResponse, type MonHocAPI, type DiemThanhPhanItem} from '@/types/user';
 import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
-import { Input } from '@/components/ui/input';
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -18,7 +17,6 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [marks, setMarks] = useState<MarkApiResponse | null>(null);
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
   const [tinchi, setTinchi] = useState<number>(0)
-  const [studentIdQuery, setStudentIdQuery] = useState<string>("")
   // const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
   const user = AuthStorage.getUser();
 
@@ -43,7 +41,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           if (!user?.UserID) {
             throw new Error("Chưa đăng nhập");
           }
-        const data = await authService.getMark(user.UserID);
+        const data = await authService.getMark();
         setMarks(data ?? null);
       } catch (e) {
         if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
@@ -59,26 +57,6 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
 
     load();
   }, [user?.UserID]);
-
-  const getUserMark = async (uid: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (!uid) {
-        throw new Error("Mã sinh viên không hợp lệ");
-      }
-      const data = await authService.getMark(uid);
-      setMarks(data ?? null);
-    } catch (e) {
-      if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
-        toast.error(e.message)
-      } else {
-        setError(e instanceof Error ? e.message : 'Không thể tải điểm');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const semesters = useMemo(() => {
     if (!marks?.data) return {} as Record<number, MonHocAPI[]>;
@@ -142,26 +120,6 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           <GraduationCap className="h-6 w-6" /> Kết quả học tập
         </h2>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <form
-            className="flex w-full sm:w-auto items-center gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!loading && studentIdQuery.trim()) {
-                getUserMark(studentIdQuery.trim());
-              }
-            }}
-          >
-            <Input
-              placeholder="Nhập mã SV..."
-              className="w-full sm:w-56"
-              value={studentIdQuery}
-              onChange={(e) => setStudentIdQuery(e.target.value)}
-              disabled={loading}
-            />
-            <Button type="submit" disabled={loading || !studentIdQuery.trim()} className="shrink-0">
-              Xem
-            </Button>
-          </form>
           {!loading && !error && marks && (
             <select
               className="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
