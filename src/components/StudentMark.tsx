@@ -18,6 +18,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
   const [tinchi, setTinchi] = useState<number>(0)
   // const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
+  const [imgsrc, setImgsrc] = useState<string>("")
   const user = AuthStorage.getUser();
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
@@ -26,6 +27,18 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
     if (Number.isNaN(num)) return String(value) || '—';
     return num.toFixed(fixed);
   };
+
+  const fetchIMG = async (url: string) => {
+    const access_token = localStorage.getItem("access_token")
+    const res = await fetch(url, {headers: {'Authorization': `Bearer ${access_token}`}})
+    if (!res.ok) {
+      throw new Error("Không thể tải ảnh")
+    }
+    const blob = await res.blob()
+    const imgSrc = URL.createObjectURL(blob)
+    setImgsrc(imgSrc)
+    return imgSrc
+  }
 
   const safeText = (value: string | null | undefined) => {
     if (!value || String(value).trim() === '') return '—';
@@ -43,6 +56,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           }
         const data = await authService.getMark();
         setMarks(data ?? null);
+        fetchIMG(data?.StudentImage ?? "")
       } catch (e) {
         if (e instanceof Error && e.message === "Phiên đăng nhập không hợp lệ!") {
           toast.error(e.message)
@@ -165,7 +179,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
             <CardContent className="py-6">
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <img
-                  src={marks.StudentImage}
+                  src={imgsrc}
                   alt={marks.HoTen}
                   className="w-28 h-28 rounded-md object-cover border border-gray-200 dark:border-gray-700"
                 />
