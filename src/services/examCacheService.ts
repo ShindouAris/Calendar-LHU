@@ -34,7 +34,7 @@ class ExamCacheService {
     });
   }
 
-  async get(studentId: string): Promise<ExamInfo[] | null> {
+  async get(studentId: string, hasnet: boolean = true): Promise<ExamInfo[] | null> {
     if (!this.db) await this.init();
 
     return new Promise((resolve) => {
@@ -47,8 +47,14 @@ class ExamCacheService {
         if (cached && Date.now() < cached.expiry) {
           resolve(cached.data);
         } else {
-          if (cached) this.delete(studentId);
-          resolve(null);
+            if (cached && hasnet) {
+                this.delete(studentId);
+                resolve(null);
+            } else if (cached && !hasnet) {
+                resolve(cached.data);
+            } else {
+                resolve(null);
+            }
         }
       };
 

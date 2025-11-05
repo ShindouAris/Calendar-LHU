@@ -1,5 +1,5 @@
-import { ApiRequest, ApiResponse, DiemDanhData, ExamInfo, ExamResponse } from '@/types/schedule';
-import { HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse } from '@/types/weather';
+import {ApiRequest, ApiResponse, DiemDanhData, ExamInfo, ExamResponse} from '@/types/schedule';
+import {HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse} from '@/types/weather';
 
 const API_ENDPOINT = import.meta.env.VITE_API_URL 
 const SCHOOL_ENDPOINT = import.meta.env.VITE_SCHOOL_ENDPOINT
@@ -201,8 +201,7 @@ export class ApiService {
           return {data: []}
         }
 
-        const data = await res.json()
-        return data
+        return await res.json()
 
       } catch (error) {
         return {data: []}
@@ -236,4 +235,14 @@ export class ApiService {
       throw error;
     }
   }
+  static async testnet (): Promise<boolean>  {
+      try {
+          await fetch(API_ENDPOINT, {
+              method: "HEAD"
+          })
+          return true
+      } catch {
+          return false;
+      }
+    }
 }

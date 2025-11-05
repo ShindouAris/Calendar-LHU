@@ -27,7 +27,7 @@ class CacheService {
     });
   }
 
-  async get(studentId: string): Promise<ApiResponse | null> {
+  async get(studentId: string, hasnet: boolean = true): Promise<ApiResponse | null> {
     if (!this.db) await this.init();
     
     return new Promise((resolve) => {
@@ -40,8 +40,14 @@ class CacheService {
         if (cached && Date.now() < cached.expiry) {
           resolve(cached.data);
         } else {
-          if (cached) this.delete(studentId);
-          resolve(null);
+          if (cached && hasnet) {
+              this.delete(studentId);
+              resolve(null);
+          } else if (cached && !hasnet) {
+              resolve(cached.data);
+          } else {
+              resolve(null);
+          }
         }
       };
       

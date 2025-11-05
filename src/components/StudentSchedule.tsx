@@ -136,9 +136,10 @@ export const StudentSchedule: React.FC = () => {
     setError(null);
     
     try {
-      // Check cache first
+        const hasnet = await ApiService.testnet()
+        // Check cache first
       if (useCache) {
-        const cachedData = await cacheService.get(studentId);
+        const cachedData = await cacheService.get(studentId, hasnet);
         if (cachedData) {
           setScheduleData(cachedData);
           setCurrentStudentId(studentId);
@@ -240,8 +241,10 @@ export const StudentSchedule: React.FC = () => {
     setLoadingExam(true);
     setExamError(null);
     try {
+        // TEST NET FIRST
+      const hasnet = await ApiService.testnet()
       // Try cache first
-      const cached = await examCacheService.get(studentId);
+      const cached = await examCacheService.get(studentId, hasnet);
       if (cached) {
         setExams(cached);
         setLoadingExam(false);
@@ -480,7 +483,7 @@ export const StudentSchedule: React.FC = () => {
     const lines: string[] = [];
     lines.push('BEGIN:VCALENDAR');
     lines.push('VERSION:2.0');
-    lines.push('PRODID:-//LHU Schedule//VN');
+    lines.push('PRODID:-//LHU DASHBOARD//VN');
     lines.push('CALSCALE:GREGORIAN');
     lines.push('METHOD:PUBLISH');
     const calName = `Lịch học ${studentInfo?.HoTen || ''}`.trim();
@@ -489,7 +492,7 @@ export const StudentSchedule: React.FC = () => {
     }
 
     items.forEach((ev, idx) => {
-      const uid = `${ev.ID || idx}-${buildICSDate(ev.ThoiGianBD)}@lhu-schedule`;
+      const uid = `${ev.ID || idx}-${buildICSDate(ev.ThoiGianBD)}@lhu-dashboard`;
       const dtStart = buildICSDate(ev.ThoiGianBD);
       const dtEnd = buildICSDate(ev.ThoiGianKT);
       const summary = `${ev.TenMonHoc || ''}${ev.TenNhom ? ' - ' + ev.TenNhom : ''}`.trim();
