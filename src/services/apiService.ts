@@ -238,7 +238,8 @@ export class ApiService {
   static async testnet (): Promise<boolean>  {
       try {
           await fetch(API_ENDPOINT, {
-              method: "HEAD"
+              method: "HEAD",
+              signal: AbortSignal.timeout(3000)
           })
           return true
       } catch {
