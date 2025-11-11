@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { GitHub } from './icons/github';
 import { toast } from 'react-hot-toast';
+import { FaParking } from 'react-icons/fa';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -114,6 +115,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
+      authrequired: true
+    },
+    {
+      id: "parkinglhu",
+      label: "Quản lý đỗ xe LHU",
+      icon: FaParking,
+      description: "Quản lý xe của tôi",
       authrequired: true
     },
     {

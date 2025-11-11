@@ -14,6 +14,7 @@ function App() {
       <Route path='/diemdanh' element={<StudentSchedule />} />
       <Route path='/mark' element={<StudentSchedule />} />
       <Route path='/qrscan' element={<StudentSchedule/>}/>
+      <Route path='/parking' element={<StudentSchedule />} />
       <Route path="*" element={<StudentSchedule />} />
     </Routes>
   );

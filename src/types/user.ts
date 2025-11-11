@@ -85,6 +85,13 @@ export const AuthStorage = {
   deleteUser() {
     localStorage.removeItem(AUTH_STORAGE_KEY)
     localStorage.removeItem("access_token")
+  },
+  getUserToken(): string {
+    const access_token = localStorage.getItem("access_token")
+    if (!access_token) {
+      throw new Error("Chưa đăng nhập")
+    }
+    return access_token
   }
 };
 

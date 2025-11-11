@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School } from 'lucide-react';
-
+// Layouts
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './ScheduleCard';
 import { EmptySchedule } from './EmptySchedule';
@@ -10,7 +10,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import { StatsCard } from './StatsCard';
 import { Layout } from './Layout';
-
+// Others
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
 import { ApiResponse, ExamInfo } from '@/types/schedule';
@@ -20,6 +20,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { Timetable } from './Timetable';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
+
+// Pages
 import WeatherPage from '@/components/WeatherPage';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthStorage } from '@/types/user';
@@ -29,6 +31,7 @@ import { ExamCard } from './ExamCard';
 import { LmsDiemDanhPage } from './LmsDiemDanhPage';
 import { authService } from '@/services/authService';
 import { QRScanner } from './LmsQr';
+import ParkingLHUPage from './ParkingLHU'
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -94,6 +97,8 @@ export const StudentSchedule: React.FC = () => {
       setPage("diemdanh")
     } else if (path.startsWith("/qrscan")) {
       setPage("qrscan")
+    } else if (path.startsWith("/parking")) {
+      setPage("parkinglhu")
     }
     else {
       setPage("home");
@@ -336,6 +341,9 @@ export const StudentSchedule: React.FC = () => {
       setPage("qrscan")
       setShowFullSchedule(false)
       navigate("/qrscan")
+    } else if (newPage === "parkinglhu") {
+      setPage("parkinglhu")
+      navigate("/parking")
     }
   };
 
@@ -386,6 +394,22 @@ export const StudentSchedule: React.FC = () => {
       >
         <div className="flex justify-center items-start px-4">
           <QRScanner />
+        </div>
+      </Layout>
+    )
+  }
+
+  if (page === "parkinglhu") {
+    return (
+      <Layout 
+        showBack={true}
+        onBack={() => handleChangeView('schhedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title='Quản lý đỗ xe LHU'
+      >
+        <div className="flex justify-center items-start w-full">
+          <ParkingLHUPage />
         </div>
       </Layout>
     )

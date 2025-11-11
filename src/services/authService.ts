@@ -1,3 +1,4 @@
+import { DepositHistory, PaymentHistory, PlateData } from '@/types/parking';
 import {AuthStorage, MarkApiResponse, UserResponse} from '@/types/user';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -9,6 +10,8 @@ export interface LoginRequestBody {
   Password: string;
   cf_verify_token: string;
 }
+
+const auth = AuthStorage
 
 export const authService = {
   async login(body: LoginRequestBody, turnstile_instance: any): Promise<void> {
@@ -43,8 +46,7 @@ export const authService = {
   },
 
   async getUserInfo(): Promise<UserResponse> {
-    const access_token = localStorage.getItem("access_token");
-    if (!access_token) throw new Error('Chưa đăng nhập hoặc thiếu token');
+    const access_token = auth.getUserToken();
     const response = await fetch(`${API_URL}/userinfo`, {
       method: 'POST',
       headers: {
@@ -76,10 +78,7 @@ export const authService = {
     return (await response.json()) as UserResponse;
   },
   async logOut(): Promise<string | null> {
-    const access_token = localStorage.getItem("access_token");
-    if (!access_token) {
-      throw new Error("Chưa đăng nhập lấy gì đăng xuất 😭❌?")
-    }
+    const access_token = auth.getUserToken();
     const response = await fetch(
       `${API_URL}/logout`,
       {
@@ -101,10 +100,7 @@ export const authService = {
     return "Đăng xuất thành công" 
   },
   async getMark(): Promise<MarkApiResponse | undefined> {
-    const access_token = localStorage.getItem("access_token")
-    if (!access_token) {
-      throw new Error("Hãy đăng nhập để xem điểm của bạn")
-    }
+    const access_token = auth.getUserToken();
     try {
       const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_GetBangDiem`, {
         method: "GET",
@@ -136,4 +132,68 @@ export const authService = {
   }
 };
 
+export const parkingAPI = {
 
+  async getCredit(): Promise<number> {
+    const access_token = auth.getUserToken();
+    const response = await fetch(`${SCHOOL_TAPI}/checkIn/Parking_GetCredit`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${access_token}`
+      }
+    })
+    if (!response.ok) {
+      return 0;
+    }
+    const data = await response.json()
+    return data.credit ?? 0;
+  },
+
+
+  async getPlates(): Promise<PlateData[]> {
+    const access_token = auth.getUserToken();
+    const response = await fetch(`${SCHOOL_TAPI}/checkIn/Parking_GetMyPlates`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${access_token}`
+      }
+    })
+    if (!response.ok) {
+      return [];
+    }
+    const data = await response.json()
+    return data.data ?? [];
+  },
+  async getLogPay(): Promise<PaymentHistory[] | null> {
+    const access_token = auth.getUserToken();
+    const response = await fetch(`${SCHOOL_TAPI}/checkIn/Parking_GetLogPay`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${access_token}`
+      }
+    })
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json()
+    return data.data ?? [];
+  },
+  async getDepositHistory(): Promise<DepositHistory[] | null> {
+    const access_token = auth.getUserToken();
+    const response = await fetch(`${SCHOOL_TAPI}/checkIn/Parking_GetDeposit`, {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${access_token}`
+      }
+    })
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json()
+    return data.data ?? [];
+  }
+}
