@@ -39,55 +39,59 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   const getStatusConfig = (status: number, isCanceled: boolean) => {
     if (isCanceled) {
         return {
-            color: 'bg-gradient-to-r from-red-500 to-red-600',
+            color: 'bg-gradient-to-r from-rose-600 to-rose-700',
             text: 'Bị hủy',
             icon: CircleSlash,
-            textColor: 'text-green-700 dark:text-green-300'
+            textColor: 'text-rose-700 dark:text-rose-300'
         };
     }
     switch (status) {
       case 1:
         return {
-          color: 'bg-gradient-to-r from-green-500 to-emerald-600',
+          color: 'bg-gradient-to-r from-emerald-600 to-emerald-700',
           text: 'Đang diễn ra',
           icon: CheckCircle2,
-          textColor: 'text-green-700 dark:text-green-300'
+          textColor: 'text-emerald-700 dark:text-emerald-300'
         };
       case 2:
         return {
-          color: 'bg-gradient-to-r from-blue-500 to-cyan-600',
+          color: 'bg-gradient-to-r from-sky-600 to-sky-700',
           text: 'Sắp diễn ra',
           icon: Clock3,
-          textColor: 'text-blue-700 dark:text-blue-300'
+          textColor: 'text-sky-700 dark:text-sky-300'
         };
       case 3:
         return {
-          color: 'bg-gradient-to-r from-gray-500 to-slate-600',
+          color: 'bg-gradient-to-r from-slate-500 to-slate-600',
           text: 'Đã kết thúc',
           icon: AlertCircle,
-          textColor: 'text-gray-700 dark:text-gray-300'
+          textColor: 'text-slate-700 dark:text-slate-300'
         };
       default:
         return {
-          color: 'bg-gradient-to-r from-red-300 to-pink-300',
+          color: 'bg-gradient-to-r from-sky-600 to-sky-700',
           text: 'Chưa bắt đầu',
           icon: AlertCircle,
-          textColor: 'text-gray-700 dark:text-gray-300'
+          textColor: 'text-slate-700 dark:text-slate-300'
         };
     }
   };
 
   const getColor = (isCanceled: boolean, isNext: boolean): string => {
-      if (isNext && !isCanceled) {
-          return 'bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-700 dark:via-indigo-800 dark:to-purple-900 shadow-blue-200 dark:shadow-blue-700'
-      }
-
-      if (isCanceled) {
-          return 'bg-gradient-to-r from-gray-50 via-indigo-50 to-gray-50 dark:from-gray-700 dark:via-indigo-800 dark:to-gray-900 shadow-red-200 dark:shadow-red-700'
-      }
-
-      return 'bg-gradient-to-tr from-blue-200 via-red-300 to-pink-300 dark:from-blue-800 dark:via-red-800 dark:to-pink-800 shadow-yellow-200 dark:shadow-yellow-700'
+    if (isNext && !isCanceled) {
+      // Tiết tiếp theo
+      return 'bg-gradient-to-r from-sky-600 via-sky-700 to-indigo-700 dark:from-indigo-900 dark:via-indigo-800 dark:to-sky-900 shadow-lg shadow-sky-300/40 dark:shadow-sky-900/40'
+    }
+  
+    if (isCanceled) {
+      // Tiết bị hủy
+      return 'bg-gradient-to-r from-zinc-300 via-zinc-400 to-zinc-500 dark:from-zinc-800 dark:via-zinc-900 dark:to-black shadow-md shadow-zinc-700/20 dark:shadow-black/30'
+    }
+  
+    // Tiết đang học
+    return 'bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 dark:from-[#03A791] dark:via-[#DD7BDF] dark:to-[#FFBBE1] shadow-lg shadow-amber-300/40 dark:shadow-indigo-900/40'
   }
+  
 
   const classStatus = (status: number) => {
     switch (status) {
@@ -234,12 +238,12 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   }, [schedule.ThoiGianBD])
 
   return (
-    <Card className={`group relative transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden ${
+    <Card className={`group relative transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden focus-within:ring-2 focus-within:ring-sky-500/70 dark:focus-within:ring-sky-400/60 focus-within:ring-offset-2 focus-within:ring-offset-white dark:focus-within:ring-offset-gray-900 ${
       getColor(canceled, isNext)
     }`}>
       {/* Next Class Banner */}
       {isNext && (
-        <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
+        <div className="bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Clock className="h-4 w-4 animate-pulse" />
             Tiết học tiếp theo - Bắt đầu sau: {timestring}
@@ -249,12 +253,12 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
 
         {canceled && (
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 bg-gradient-to-br
-                    from-red-100/40 via-rose-200/40 to-pink-100/40 dark:from-red-950/40 dark:via-rose-900/40 dark:to-pink-950/40">
-                <h2 className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400 mb-3">
+                    from-rose-100/50 via-rose-200/50 to-red-100/50 dark:from-rose-950/50 dark:via-rose-900/50 dark:to-red-950/50">
+                <h2 className="text-2xl sm:text-3xl font-bold text-rose-700 dark:text-rose-300 mb-3">
                     <FuzzyText baseIntensity={0.3} hoverIntensity={0.7} enableHover={true}>Tiết báo nghỉ</FuzzyText>
                 </h2>
                 <motion.p
-                    className="mt-4 text-gray-400 lg:text-2xl sm:text-sm tracking-wider"
+                    className="mt-4 text-slate-200 dark:text-slate-300 lg:text-2xl sm:text-sm tracking-wider"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2 }}
@@ -263,7 +267,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                 </motion.p>
             </div>
         )}
-            <CardContent className={`p-5 sm:p-6 lg:p-8 transition-all duration-500 ${
+            <CardContent className={`p-5 sm:p-6 lg:p-8 transition-all duration-500 bg-white/60 dark:bg-gray-900/30 backdrop-blur supports-[backdrop-filter]:bg-white/30 dark:supports-[backdrop-filter]:bg-gray-900/20 ${
                 canceled ? 'blur-sm brightness-75 pointer-events-none select-none' : ''
             }`}>
             {/* Header Section */}
@@ -272,7 +276,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-blue-800 to-indigo-600 dark:from-blue-200 dark:to-indigo-100 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-violet-400 group-hover:dark:from-blue-300 group-hover:dark:to-violet-300 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
+                                <h3 className="text-lg sm:text-xl font-bold mb-2.5 sm:mb-3 bg-gradient-to-r from-slate-900 to-indigo-800 dark:from-sky-200 dark:to-indigo-200 bg-clip-text text-transparent group-hover:from-sky-600 group-hover:to-indigo-400 group-hover:dark:from-sky-300 group-hover:dark:to-indigo-300 transition-all cursor-help line-clamp-2 hover:line-clamp-none">
                                     {schedule.TenMonHoc}
                                 </h3>
                             </TooltipTrigger>
@@ -284,34 +288,34 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     <div
                         className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                         <div
-                            className="flex items-center gap-2 bg-pink-200 dark:bg-blue-950/50 px-2.5 sm:px-3 py-1 rounded-full">
-                            <Calendar className="h-4 w-4 text-blue-500"/>
+                            className="flex items-center gap-2 bg-sky-100 dark:bg-sky-900/40 text-slate-700 dark:text-slate-300 px-2.5 sm:px-3 py-1 rounded-full">
+                            <Calendar className="h-4 w-4 text-sky-600 dark:text-sky-400"/>
                             <span className="font-medium">{getDayName(schedule.Thu)}</span>
                         </div>
-                        <span className="hidden sm:inline text-gray-400">•</span>
-                        <span className="font-medium">{formatDate(schedule.ThoiGianBD)}</span>
+                        <span className="hidden sm:inline text-slate-400 dark:text-slate-500">•</span>
+                        <span className="font-medium text-slate-500 dark:text-slate-400">{formatDate(schedule.ThoiGianBD)}</span>
                         {/* Badges: TinhTrang, CalenType, Type */}
                         {classStatus(schedule.TinhTrang) !== "" && (
                             <Badge
-                                className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full shadow">
+                                className="bg-gradient-to-r from-rose-600 to-red-700 text-white px-2.5 py-1 rounded-full shadow">
                                 {classStatus(schedule.TinhTrang)}
                             </Badge>
                         )}
                         {duplicateInfo.isDuplicate && (
                             <Badge
-                                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white px-2.5 py-1 rounded-full shadow">
+                                className="bg-gradient-to-r from-amber-600 to-orange-700 text-white px-2.5 py-1 rounded-full shadow">
                                 {duplicateInfo.duplicateSchedules?.length ? duplicateInfo.duplicateSchedules.length - 1 : 0} lịch
                                 trùng
                             </Badge>
                         )}
                         {schedule.CalenType === 2 && (
                             <Badge
-                                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-1 rounded-full shadow">
+                                className="bg-gradient-to-r from-amber-600 to-orange-700 text-white px-2.5 py-1 rounded-full shadow">
                                 Thi
                             </Badge>
                         )}
                         <Badge
-                            className="bg-gradient-to-r from-slate-200 to-slate-300 text-slate-900 dark:from-slate-700 dark:to-slate-600 dark:text-white px-2.5 py-1 rounded-full shadow">
+                            className="bg-gradient-to-r from-zinc-200 to-slate-300 text-slate-900 dark:from-slate-700 dark:to-zinc-700 dark:text-white px-2.5 py-1 rounded-full shadow">
                             {schedule.Type === 0 ? 'Lý thuyết' : 'Thực hành'}
                         </Badge>
                     </div>
@@ -330,33 +334,33 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                 {/* Left Column */}
                 <div className="space-y-4">
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-sky-950/30 dark:to-indigo-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
-                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-sky-500 to-indigo-600 rounded-full flex items-center justify-center">
                             <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời gian</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Thời gian</div>
                             <div
-                                className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white break-words">
                                 {formatTime(schedule.ThoiGianBD)} - {formatTime(schedule.ThoiGianKT)}
                             </div>
                         </div>
                     </div>
 
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-rose-50 to-red-50 dark:from-rose-950/30 dark:to-red-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
-                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center">
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-rose-500 to-red-600 rounded-full flex items-center justify-center">
                             <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Phòng học</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Phòng học</div>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div
-                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
                                             {schedule.TenPhong}
                                         </div>
                                     </TooltipTrigger>
@@ -369,18 +373,18 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     </div>
 
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
-                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                            className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center">
                             <User className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Giảng viên</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Giảng viên</div>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div
-                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
                                             {schedule.GiaoVien}
                                         </div>
                                     </TooltipTrigger>
@@ -396,18 +400,18 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                 {/* Right Column */}
                 <div className="space-y-4">
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
                             className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center">
                             <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1 overflow-hidden">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nhóm học</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Nhóm học</div>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div ref={groupNameRef}
-                                             className={`text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
+                                             className={`text-sm sm:text-base font-semibold text-slate-900 dark:text-white cursor-help ${shouldMarquee ? 'animate-marquee' : 'line-clamp-1 hover:line-clamp-none'} transition-all`}>
                                             {schedule.TenNhom}
                                         </div>
                                     </TooltipTrigger>
@@ -420,18 +424,18 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     </div>
 
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
                             className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center">
                             <Building className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Cơ sở</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Cơ sở</div>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <div
-                                            className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
+                                            className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white cursor-help line-clamp-1 hover:line-clamp-none transition-all">
                                             {getStudyPlace(schedule)}
                                         </div>
                                     </TooltipTrigger>
@@ -444,15 +448,15 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     </div>
 
                     <div
-                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-950/30 dark:to-gray-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
+                        className="flex items-center gap-3 p-3 bg-gradient-to-r from-slate-50 to-zinc-50 dark:from-slate-950/30 dark:to-zinc-950/30 rounded-xl min-h-[60px] sm:min-h-[72px]">
                         <div
                             className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-slate-500 to-gray-600 rounded-full flex items-center justify-center">
                             <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                         </div>
                         <div className="min-w-0 flex-1">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời lượng tiết</div>
+                            <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Thời lượng tiết</div>
                             <div
-                                className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white break-words">
                                 {minutesToHourMinute(schedule.SoTietBuoi)}
                             </div>
                         </div>
@@ -475,10 +479,10 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                                 />
                             </div>
                             <div className="min-w-0 flex-1">
-                                <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Thời tiết dự kiến
+                                <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Thời tiết dự kiến
                                 </div>
                                 <div
-                                    className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white break-words">
+                                    className="text-sm sm:text-base font-semibold text-slate-900 dark:text-white break-words">
                                     {forecastHour.temp_c}°C • {forecastHour?.condition?.text ?? 'Không có dữ liệu'}
                                 </div>
                             </div>
@@ -488,20 +492,20 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     {/* Duplicate Schedule Info */}
                     {duplicateInfo.isDuplicate && duplicateInfo.duplicateSchedules && (
                         <div
-                            className="flex items-center gap-3 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl min-h-[60px] sm:min-h-[72px] border border-orange-200 dark:border-orange-700">
+                            className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 rounded-xl min-h-[60px] sm:min-h-[72px] border border-amber-200 dark:border-amber-700">
                             <div
                                 className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-400 to-amber-400 rounded-full flex items-center justify-center">
                                 <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-white"/>
                             </div>
                             <div className="min-w-0 flex-1">
-                                <div className="text-xs sm:text-sm text-orange-700 dark:text-orange-300 font-semibold">
+                                <div className="text-xs sm:text-sm text-amber-700 dark:text-amber-300 font-semibold">
                                     Cảnh báo: Lịch trùng thời gian
                                 </div>
                                 <div
-                                    className="text-sm sm:text-base font-semibold text-orange-900 dark:text-orange-100">
+                                    className="text-sm sm:text-base font-semibold text-amber-900 dark:text-amber-100">
                                     Có {duplicateInfo.duplicateSchedules.length - 1} lịch cùng thời gian
                                 </div>
-                                <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                                <div className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                                     {duplicateInfo.status?.statusText && `Trạng thái: ${duplicateInfo.status.statusText}`}
                                 </div>
                             </div>
@@ -518,14 +522,14 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                         size="lg"
                         variant="outline"
                         onClick={() => window.open(schedule.GoogleMap, '_blank')}
-                        className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group w-full"
+                        className="flex items-center gap-2 hover:bg-sky-50 dark:hover:bg-sky-900/40 hover:border-sky-300 dark:hover:border-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 group w-full"
                     >
                         <div
-                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400"/>
+                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-sky-100 to-indigo-100 dark:from-sky-900 dark:to-indigo-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <MapPin className="h-4 w-4 text-sky-600 dark:text-sky-400"/>
                         </div>
                         <span>Xem bản đồ</span>
-                        <ExternalLink className="h-4 w-4 text-blue-500 group-hover:translate-x-1 transition-transform"/>
+                        <ExternalLink className="h-4 w-4 text-sky-500 group-hover:translate-x-1 transition-transform"/>
                     </Button>
                 )}
 
@@ -540,15 +544,15 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                             window.open(schedule.OnlineLink, '_blank')
                             }
                         }}
-                        className="flex items-center gap-2 hover:bg-green-50 dark:hover:bg-green-950/50 hover:border-green-300 dark:hover:border-green-700 transition-all duration-300 group w-full"
+                        className="flex items-center gap-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 hover:border-emerald-300 dark:hover:border-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 group w-full"
                     >
                         <div
-                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                            {getStudyPlace(schedule) === "Học Trên Learn" ? (<BookOpen className="h-4 w-4 text-green-600 dark:text-green-400" />) : (<Video className="h-4 w-4 text-green-600 dark:text-green-400"/>) }
+                            className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                            {getStudyPlace(schedule) === "Học Trên Learn" ? (<BookOpen className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />) : (<Video className="h-4 w-4 text-emerald-600 dark:text-emerald-400"/>) }
                         </div>
                         <span>Tham gia online</span>
                         <ExternalLink
-                            className="h-4 w-4 text-green-500 group-hover:translate-x-1 transition-transform"/>
+                            className="h-4 w-4 text-emerald-500 group-hover:translate-x-1 transition-transform"/>
                     </Button>
                 )}
             </div>
