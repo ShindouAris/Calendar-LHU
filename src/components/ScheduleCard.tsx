@@ -26,6 +26,7 @@ import {
   detectDuplicateSchedules, 
   getDuplicateGroupStatus 
 } from '@/utils/scheduleUtils';
+import { getTinhTrangInfo, isTinhTrangCancelled } from '@/utils/tinhtrang';
 import FuzzyText from "@/components/FuzzyText.tsx";
 import { motion } from "framer-motion";
 
@@ -93,19 +94,6 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   }
   
 
-  const classStatus = (status: number) => {
-    switch (status) {
-      case 0: 
-        return "";
-      case 1: 
-        return "Hủy";
-      case 2:
-        return "Báo Nghỉ";
-      default: 
-       return "";
-    }
-  } 
-
   function minutesToHourMinute(minutes: number): string {
     const h = Math.floor(minutes / 60); // chia lấy giờ
     const m = minutes % 60; // còn dư là phút
@@ -116,9 +104,20 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
   const effectiveStatus = realtimeStatus !== undefined && realtimeStatus !== null
     ? realtimeStatus
     : schedule.TinhTrang;
-  const canceled = schedule.TinhTrang !== 0
+  const tinhTrangInfo = getTinhTrangInfo(schedule.TinhTrang);
+  const canceled = isTinhTrangCancelled(schedule.TinhTrang);
   const statusConfig = getStatusConfig(effectiveStatus, canceled);
   const StatusIcon = statusConfig.icon;
+  const overlayTitle = tinhTrangInfo.type === 'holiday' ? 'Nghỉ lễ' : 'Tiết báo nghỉ';
+  const overlayDescription = tinhTrangInfo.type === 'holiday'
+    ? `Môn học ${schedule.TenMonHoc} được nghỉ do lịch nghỉ lễ`
+    : `Môn học ${schedule.TenMonHoc} đã báo nghỉ`;
+  const overlayBackgroundClass = tinhTrangInfo.type === 'holiday'
+    ? 'bg-gradient-to-br from-emerald-100/60 via-green-100/40 to-emerald-200/40 dark:from-emerald-950/60 dark:via-green-900/40 dark:to-emerald-900/50'
+    : 'bg-gradient-to-br from-rose-100/50 via-rose-200/50 to-red-100/50 dark:from-rose-950/50 dark:via-rose-900/50 dark:to-red-950/50';
+  const overlayTitleClass = tinhTrangInfo.type === 'holiday'
+    ? 'text-emerald-700 dark:text-emerald-200'
+    : 'text-rose-700 dark:text-rose-300';
 
   const getStudyPlace = (schedule: ScheduleItem) => {
     if (schedule.TenCoSo.toLocaleLowerCase().includes("khác")) {
@@ -128,7 +127,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
         return "Học Trên Learn"
     }
     if (schedule.TenCoSo.toLocaleLowerCase().includes("online")) {
-      return "Học Online Zoom";
+      return "Học Online";
     }
 
     return schedule.TenCoSo.replace("Cơ sở ", "").trim();
@@ -252,10 +251,9 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
       )}
 
         {canceled && (
-            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 bg-gradient-to-br
-                    from-rose-100/50 via-rose-200/50 to-red-100/50 dark:from-rose-950/50 dark:via-rose-900/50 dark:to-red-950/50">
-                <h2 className="text-2xl sm:text-3xl font-bold text-rose-700 dark:text-rose-300 mb-3">
-                    <FuzzyText baseIntensity={0.3} hoverIntensity={0.7} enableHover={true}>Tiết báo nghỉ</FuzzyText>
+            <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 ${overlayBackgroundClass}`}>
+                <h2 className={`text-2xl sm:text-3xl font-bold mb-3 ${overlayTitleClass}`}>
+                    <FuzzyText baseIntensity={0.3} hoverIntensity={0.7} enableHover={true}>{overlayTitle}</FuzzyText>
                 </h2>
                 <motion.p
                     className="mt-4 text-slate-200 dark:text-slate-300 lg:text-2xl sm:text-sm tracking-wider"
@@ -263,7 +261,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2 }}
                 >
-                    Môn học <span className="font-semibold">{schedule.TenMonHoc}</span> đã báo nghỉ
+                    {overlayDescription}
                 </motion.p>
             </div>
         )}
@@ -295,10 +293,10 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
                         <span className="hidden sm:inline text-slate-400 dark:text-slate-500">•</span>
                         <span className="font-medium text-slate-500 dark:text-slate-400">{formatDate(schedule.ThoiGianBD)}</span>
                         {/* Badges: TinhTrang, CalenType, Type */}
-                        {classStatus(schedule.TinhTrang) !== "" && (
+                        {tinhTrangInfo.flagText && (
                             <Badge
-                                className="bg-gradient-to-r from-rose-600 to-red-700 text-white px-2.5 py-1 rounded-full shadow">
-                                {classStatus(schedule.TinhTrang)}
+                                className={`${tinhTrangInfo.badgeClassName ?? ''} px-2.5 py-1 rounded-full shadow text-xs sm:text-sm font-semibold`}>
+                                {tinhTrangInfo.flagText}
                             </Badge>
                         )}
                         {duplicateInfo.isDuplicate && (

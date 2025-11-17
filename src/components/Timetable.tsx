@@ -11,6 +11,7 @@ import {
   addScheduleMetadata, 
   ScheduleWithMetadata
 } from '@/utils/scheduleUtils';
+import { getTinhTrangInfo, isTinhTrangCancelled, type TinhTrangInfo } from '@/utils/tinhtrang';
 import { DuplicateScheduleWarning } from './DuplicateScheduleWarning';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -44,9 +45,14 @@ interface CalendarEvent {
   resource: ScheduleWithMetadata | (ExamInfo & { __isExam: true });
 }
 
-const getStatusColor = (status: number, is_cancelled: boolean) => {
-  if (is_cancelled) {
-    return 'bg-red-500'
+const getStatusColor = (status: number, tinhTrangInfo?: TinhTrangInfo | null) => {
+  if (tinhTrangInfo) {
+    if (tinhTrangInfo.type === 'holiday') {
+      return 'bg-pink-500';
+    }
+    if (tinhTrangInfo.type === 'cancelled' || tinhTrangInfo.type === 'special') {
+      return 'bg-red-500';
+    }
   }
   switch (status) {
     case 1: return 'bg-green-500'; // Đang diễn ra
@@ -56,9 +62,14 @@ const getStatusColor = (status: number, is_cancelled: boolean) => {
   }
 };
 
-const getStatusText = (status: number, is_cancelled: boolean) => {
-  if (is_cancelled) {
-    return 'Báo Nghỉ'
+const getStatusText = (status: number, tinhTrangInfo?: TinhTrangInfo | null) => {
+  if (tinhTrangInfo) {
+    if (tinhTrangInfo.type === 'holiday') {
+      return tinhTrangInfo.flagText ?? 'Nghỉ lễ';
+    }
+    if (tinhTrangInfo.type === 'cancelled' || tinhTrangInfo.type === 'special') {
+      return 'Báo nghỉ';
+    }
   }
   switch (status) {
     case 1: return 'Đang diễn ra';
@@ -95,7 +106,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   const events: CalendarEvent[] = useMemo(() => {
     // Tùy theo includeCancelled mà lọc hay không
-    const filtered = includeCancelled ? (schedules || []) : (schedules || []).filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
+    const filtered = includeCancelled
+      ? (schedules || [])
+      : (schedules || []).filter(s => !isTinhTrangCancelled(s.TinhTrang));
     // Thêm metadata và xử lý lịch trùng
     const schedulesWithMetadata = addScheduleMetadata(filtered);
     const duplicates = detectDuplicateSchedules(filtered);
@@ -163,7 +176,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   // Phát hiện lịch trùng để hiển thị cảnh báo
   const duplicates = useMemo(() => {
-    const source = includeCancelled ? (schedules || []) : (schedules || []).filter(s => s.TinhTrang !== 1 && s.TinhTrang !== 2);
+    const source = includeCancelled
+      ? (schedules || [])
+      : (schedules || []).filter(s => !isTinhTrangCancelled(s.TinhTrang));
     return detectDuplicateSchedules(source);
   }, [schedules, includeCancelled]);
 
@@ -171,9 +186,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
     const isExam = (event.resource as any).__isExam === true;
     const scheduleResource = event.resource as ScheduleWithMetadata;
-    const is_cancelled = !isExam && (scheduleResource.TinhTrang === 1 || scheduleResource.TinhTrang === 2);
+    const tinhTrangInfo = !isExam ? getTinhTrangInfo(scheduleResource.TinhTrang) : null;
     const is_duplicate = !isExam && scheduleResource.isDuplicate;
-    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, is_cancelled);
+    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, tinhTrangInfo);
     
     const getColorValue = (colorClass: string) => {
       switch (colorClass) {
@@ -182,6 +197,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
         case 'bg-gray-400': return '#9ca3af';
         case 'bg-red-500': return '#E62727';
         case 'bg-indigo-600': return '#4f46e5';
+        case 'bg-pink-500': return '#FF8FB7'
         default: return '#3b82f6';
       }
     };
@@ -228,9 +244,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     );
     const isExam = (event.resource as any).__isExam === true;
     const scheduleResource = event.resource as ScheduleWithMetadata;
-    const is_cancelled = !isExam && scheduleResource.TinhTrang === 1;
+    const tinhTrangInfo = !isExam ? getTinhTrangInfo(scheduleResource.TinhTrang) : null;
     const is_duplicate = !isExam && scheduleResource.isDuplicate;
-    const statusText = isExam ? 'Kỳ thi' : getStatusText(status, is_cancelled);
+    const statusText = isExam ? 'Kỳ thi' : getStatusText(status, tinhTrangInfo);
     
     const getPaddingClass = () => {
       if (isMobile) return 'p-0.5 text-xs';
@@ -298,7 +314,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               variant="secondary"
               className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
                 status,
-                is_cancelled
+                tinhTrangInfo
               )} text-white border-0 shadow-sm`}
             >
               {statusText}
